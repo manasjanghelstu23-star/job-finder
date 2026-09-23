@@ -319,72 +319,6 @@ export default function SkillsPage() {
   return (
     <div className="w-full bg-white min-h-screen relative font-sans text-gray-800">
       
-      {/* Top Corporate Header Bar */}
-      <div className="border-b border-gray-200 bg-white sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-4">
-          {/* Upper Utility Bar */}
-          <div className="flex justify-end items-center space-x-6 py-2 text-xs text-gray-600 border-b border-gray-100">
-            <span className="flex items-center space-x-1 cursor-pointer hover:text-green-600">
-              <Globe className="w-3.5 h-3.5" />
-              <span>English</span>
-              <ChevronDown className="w-3 h-3 ml-0.5" />
-            </span>
-            <span className="flex items-center space-x-1 cursor-pointer hover:text-green-600">
-              <Phone className="w-3.5 h-3.5" />
-              <span>Call Us</span>
-              <ChevronDown className="w-3 h-3 ml-0.5" />
-            </span>
-            <span className="flex items-center space-x-1 cursor-pointer hover:text-green-600">
-              <Mail className="w-3.5 h-3.5" />
-              <span>Contact Us</span>
-            </span>
-            <Link href="/login" className="flex items-center space-x-1 font-medium text-gray-700 hover:text-green-600">
-              <Lock className="w-3.5 h-3.5" />
-              <span>Login</span>
-            </Link>
-          </div>
-
-          {/* Main Navigation Bar */}
-          <div className="flex justify-between items-center py-4">
-            <div className="flex items-center space-x-8">
-              <span className="text-2xl font-black tracking-widest text-[#0c2340]">MARSH</span>
-              
-              <nav className="hidden md:flex items-center space-x-7 text-xs font-semibold tracking-wider text-gray-700 uppercase">
-                <button 
-                  onClick={() => setShowAssessmentTools(!showAssessmentTools)}
-                  className={`flex items-center space-x-1 py-1 hover:text-green-600 transition-colors ${showAssessmentTools ? "text-green-600 border-b-2 border-green-600 font-bold" : ""}`}
-                >
-                  <span>Assessment Battery</span>
-                  <ChevronDown className="w-3.5 h-3.5" />
-                </button>
-                <span className="flex items-center space-x-1 cursor-pointer hover:text-green-600">
-                  <span>Hiring and L&D</span>
-                  <ChevronDown className="w-3.5 h-3.5" />
-                </span>
-                <button 
-                  onClick={() => handleOpenCodingSkillTests()}
-                  className="hover:text-green-600 cursor-pointer"
-                >
-                  Test Library
-                </button>
-                <span className="hover:text-green-600 cursor-pointer">Pricing</span>
-                <span className="flex items-center space-x-1 cursor-pointer hover:text-green-600">
-                  <span>Resources</span>
-                  <ChevronDown className="w-3.5 h-3.5" />
-                </span>
-              </nav>
-            </div>
-
-            <button 
-              onClick={() => handleGenerateAssessment()}
-              className="bg-[#27AE60] hover:bg-[#219653] text-white text-xs font-bold px-6 py-2.5 rounded tracking-wider uppercase transition-colors shadow-sm"
-            >
-              Request A Demo
-            </button>
-          </div>
-        </div>
-      </div>
-
       {/* Online Assessment Tools Flyout / Mega Dropdown View */}
       {showAssessmentTools && (
         <div className="fixed inset-0 bg-black/30 backdrop-blur-xs z-50 flex justify-start items-start pt-24 pl-4 md:pl-24">
@@ -502,33 +436,49 @@ export default function SkillsPage() {
         </div>
       )}
 
-      {/* Hero Section */}
-      <div className="bg-gray-50 py-24 text-center px-4 border-b border-gray-100">
-        <h1 className="text-4xl md:text-5xl font-light text-gray-900 mb-6 tracking-tight">
-          <span className="font-medium text-[#1E3A8A]">Mercer | Mettl:</span> The Global Leaders in Talent Assessment
-        </h1>
-        <p className="text-lg text-gray-600 max-w-3xl mx-auto mb-10">
-          Conduct Customized Online Assessments on our Powerful Cloud-based Platform, Secured with Best-in-class Proctoring
-        </p>
-        
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-          <select 
-            value={targetRole}
-            onChange={(e) => setTargetRole(e.target.value)}
-            className="px-6 py-4 border border-gray-300 rounded focus:ring-green-500 focus:border-green-500 bg-white min-w-[250px] shadow-sm text-gray-700"
-          >
-            <option value="Backend Developer">Backend Developer</option>
-            <option value="Frontend Developer">Frontend Developer</option>
-            <option value="Data Scientist">Data Scientist</option>
-            <option value="Product Manager">Product Manager</option>
-          </select>
-          <button 
-            onClick={() => handleGenerateAssessment()}
-            disabled={isGenerating}
-            className="bg-[#27AE60] text-white px-8 py-4 rounded font-medium hover:bg-[#219653] transition-colors shadow-md disabled:opacity-50 text-sm tracking-wider uppercase font-bold"
-          >
-            {isGenerating ? "Generating..." : "Get A Free Trial"}
-          </button>
+      {/* Student Skill Assessment Banner */}
+      <div className="max-w-7xl mx-auto px-4 pt-6 pb-2">
+        <div className="bg-gradient-to-r from-[#0c2340] via-[#1a365d] to-[#0f172a] rounded-3xl p-6 sm:p-10 text-white relative overflow-hidden shadow-sm">
+          <div className="max-w-3xl relative z-10">
+            <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-blue-500/20 border border-blue-400/30 text-blue-300 text-xs font-semibold mb-3">
+              <CheckSquare className="w-3.5 h-3.5" />
+              <span>Skill Verification & Testing Hub</span>
+            </div>
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-white">
+              Skill Assessments & Certifications
+            </h1>
+            <p className="text-sm sm:text-base text-slate-300 mt-2 max-w-2xl leading-relaxed">
+              Validate your technical capabilities with structured coding challenges, domain quizzes, and industry-benchmark skill assessments.
+            </p>
+
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 mt-6">
+              <select 
+                value={targetRole}
+                onChange={(e) => setTargetRole(e.target.value)}
+                className="px-4 py-2.5 rounded-xl border border-slate-700 bg-slate-800 text-slate-100 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm"
+              >
+                <option value="Backend Developer">Backend Developer</option>
+                <option value="Frontend Developer">Frontend Developer</option>
+                <option value="Data Scientist">Data Scientist</option>
+                <option value="Product Manager">Product Manager</option>
+              </select>
+              <button 
+                onClick={() => handleGenerateAssessment()}
+                disabled={isGenerating}
+                className="bg-[#27AE60] hover:bg-[#219653] text-white px-6 py-2.5 rounded-xl text-xs font-bold transition-all shadow-md flex items-center justify-center space-x-2 disabled:opacity-50 tracking-wider uppercase"
+              >
+                <Brain className="w-4 h-4" />
+                <span>{isGenerating ? "Preparing Assessment..." : "Launch Skill Test"}</span>
+              </button>
+              <button 
+                onClick={() => handleOpenCodingSkillTests()}
+                className="bg-white/10 hover:bg-white/15 border border-white/20 text-white px-5 py-2.5 rounded-xl text-xs font-semibold transition-colors flex items-center justify-center space-x-2"
+              >
+                <Code2 className="w-4 h-4 text-emerald-400" />
+                <span>Test Library</span>
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -669,7 +619,7 @@ export default function SkillsPage() {
 
             {/* Description Paragraph */}
             <p className="text-gray-600 text-xs md:text-sm text-center max-w-4xl mx-auto mb-14 leading-relaxed">
-              {selectedSkillDetail.skillName} roles demand more than conceptual understanding. Candidates need to demonstrate how they translate logic into working, interactive applications. The Mercer {selectedSkillDetail.skillName} Programming Skills Test is a structured pre-employment assessment that evaluates coding proficiency, problem-solving approach, and the ability to build dynamic web functionality. It covers core {selectedSkillDetail.skillName} concepts, {selectedSkillDetail.roleTitle.toLowerCase()} implementation, and real-world coding scenarios. By offering a simulated environment, the assessment provides a clear view of how candidates perform in development-focused roles.
+              {selectedSkillDetail.skillName} roles demand more than conceptual understanding. Candidates need to demonstrate how they translate logic into working, interactive applications. The {selectedSkillDetail.skillName} Programming Skills Test is a structured assessment that evaluates coding proficiency, problem-solving approach, and the ability to build dynamic web functionality. It covers core {selectedSkillDetail.skillName} concepts, {selectedSkillDetail.roleTitle.toLowerCase()} implementation, and real-world coding scenarios. By offering a simulated environment, the assessment provides a clear view of how candidates perform in development-focused roles.
             </p>
 
             {/* 6 Metadata Cards */}
@@ -1157,7 +1107,7 @@ export default function SkillsPage() {
               <Link href="/login" className="text-[#0091DA] hover:underline font-medium">
                 Log In
               </Link>{" "}
-              to the Mercer | Mettl platform now
+              to your student account now
             </p>
 
             {/* Form Fields */}

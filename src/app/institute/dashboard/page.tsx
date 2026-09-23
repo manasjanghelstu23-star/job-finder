@@ -1473,41 +1473,68 @@ export default function InstituteDashboardPage() {
           {/* SECTION 10: 📄 DOCUMENTS & ACCREDITATION COMPLIANCE                 */}
           {/* =================================================================== */}
           {activeSection === "documents" && (
-            <div className="bg-white rounded-3xl border border-gray-200 p-7 shadow-xs space-y-6">
-              <div className="flex justify-between items-center pb-4 border-b border-gray-100">
+            <div className="bg-white rounded-3xl border border-slate-200/80 p-6 md:p-8 shadow-xs space-y-6">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-slate-100">
                 <div>
-                  <h3 className="text-xl font-black text-slate-900">Institutional Documents & Regulatory Filings</h3>
-                  <p className="text-xs text-gray-500">NAAC Self-Study Reports (SSR), NBA compliance audits, and AICTE mandatory disclosures.</p>
+                  <div className="flex items-center space-x-2 mb-1">
+                    <h3 className="text-xl font-extrabold text-slate-900 tracking-tight">Institutional Documents &amp; Regulatory Filings</h3>
+                    <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200/60">
+                      NAAC A++ Ready
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-500">Official NAAC Self-Study Reports (SSR), NBA compliance audits, and AICTE mandatory disclosures.</p>
                 </div>
-                <button className="bg-slate-900 text-white text-xs font-bold px-4 py-2 rounded-xl flex items-center gap-1.5 cursor-pointer">
-                  <Download className="w-4 h-4" />
-                  <span>Download NAAC SSR Bundle</span>
-                </button>
+                <div className="flex items-center space-x-2">
+                  <button
+                    onClick={() => alert("Ready to upload new statutory document")}
+                    className="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-all flex items-center space-x-1.5 cursor-pointer"
+                  >
+                    <Plus className="w-3.5 h-3.5 text-slate-600" />
+                    <span>Upload Filing</span>
+                  </button>
+                  <button
+                    onClick={() => alert("Downloading consolidated NAAC SSR Bundle (43.5 MB)...")}
+                    className="bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold px-4 py-2 rounded-xl flex items-center gap-1.5 cursor-pointer transition-all shadow-xs"
+                  >
+                    <Download className="w-3.5 h-3.5" />
+                    <span>Download SSR Bundle</span>
+                  </button>
+                </div>
               </div>
 
+              {/* Document Cards Grid */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {[
-                  { name: "NAAC Institutional Accreditation SSR Report 2026.pdf", size: "18.4 MB", type: "Accreditation", date: "Verified June 2026" },
-                  { name: "NBA Tier-1 Tier Compliance Document for CSE & IT.pdf", size: "12.2 MB", type: "NBA Regulatory", date: "Verified May 2026" },
-                  { name: "AICTE Mandatory Institutional Disclosure 2026-27.pdf", size: "4.8 MB", type: "AICTE Statutory", date: "Annual Filing" },
-                  { name: "Bilateral Corporate MoUs Consolidated Registry.pdf", size: "8.1 MB", type: "Legal Contracts", date: "Updated Weekly" }
+                  { name: "NAAC Institutional Accreditation SSR Report 2026.pdf", size: "18.4 MB", type: "Accreditation", date: "Verified June 2026", color: "indigo" },
+                  { name: "NBA Tier-1 Compliance Document for CSE & IT.pdf", size: "12.2 MB", type: "NBA Regulatory", date: "Verified May 2026", color: "blue" },
+                  { name: "AICTE Mandatory Institutional Disclosure 2026-27.pdf", size: "4.8 MB", type: "AICTE Statutory", date: "Annual Filing", color: "emerald" },
+                  { name: "Bilateral Corporate MoUs Consolidated Registry.pdf", size: "8.1 MB", type: "Legal Contracts", date: "Updated Weekly", color: "amber" }
                 ].map((doc, idx) => (
-                  <div key={idx} className="p-4 rounded-2xl bg-gray-50 border border-gray-200 flex justify-between items-center">
-                    <div className="flex items-center space-x-3">
-                      <div className="p-2.5 bg-white border border-gray-200 rounded-xl text-indigo-600">
+                  <div key={idx} className="p-4 sm:p-5 rounded-2xl bg-slate-50/70 border border-slate-200/80 hover:border-indigo-300 hover:bg-white transition-all flex justify-between items-center group shadow-2xs">
+                    <div className="flex items-center space-x-3.5 min-w-0">
+                      <div className="w-11 h-11 rounded-xl bg-white border border-slate-200/80 text-indigo-600 flex items-center justify-center shrink-0 shadow-2xs group-hover:scale-105 transition-transform">
                         <FileText className="w-5 h-5" />
                       </div>
-                      <div>
-                        <h4 className="text-xs font-extrabold text-slate-900 truncate max-w-xs">{doc.name}</h4>
-                        <p className="text-[10px] text-gray-500">{doc.type} • {doc.size} • {doc.date}</p>
+                      <div className="min-w-0">
+                        <h4 className="text-xs font-bold text-slate-900 truncate" title={doc.name}>{doc.name}</h4>
+                        <div className="flex items-center space-x-2 mt-1">
+                          <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-white border border-slate-200 text-slate-600">
+                            {doc.type}
+                          </span>
+                          <span className="text-[11px] text-slate-400">• {doc.size}</span>
+                          <span className="text-[11px] text-slate-400 hidden sm:inline">• {doc.date}</span>
+                        </div>
                       </div>
                     </div>
-                    <button
-                      onClick={() => alert(`Downloading verified document: ${doc.name}`)}
-                      className="text-indigo-600 hover:text-indigo-800 text-xs font-bold cursor-pointer"
-                    >
-                      Download
-                    </button>
+                    <div className="flex items-center space-x-1 shrink-0 ml-3">
+                      <button
+                        onClick={() => alert(`Downloading verified document: ${doc.name}`)}
+                        className="px-3 py-1.5 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-bold cursor-pointer transition-colors flex items-center space-x-1"
+                      >
+                        <Download className="w-3.5 h-3.5" />
+                        <span className="hidden sm:inline">Download</span>
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>

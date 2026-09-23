@@ -17,6 +17,7 @@ model User {
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
+  profile             Profile?
   studentProfile      StudentProfile?
   industryProfile     IndustryProfile?
   institutionProfile  InstitutionProfile?
@@ -27,11 +28,39 @@ model User {
   messages            Message[]
 }
 
+model Profile {
+  id              String   @id @default(cuid())
+  userId          String   @unique
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role            String   @default("STUDENT") // "STUDENT", "COMPANY", "INSTITUTE", "ADMIN"
+  fullName        String
+  email           String
+  phone           String?
+  profilePhoto    String?
+  bio             String?
+  college         String?
+  course          String?
+  branch          String?
+  graduationYear  Int?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
 model StudentProfile {
   id              String   @id @default(cuid())
   userId          String   @unique
   user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   targetRole      String?
+  studentId       String?
+  college         String?
+  degree          String?
+  branch          String?
+  semester        Int?
+  cgpa            Float?
+  resumeUrl       String?
+  githubUrl       String?
+  linkedinUrl     String?
+  portfolioUrl    String?
   
   institutionId   String?
   institution     InstitutionProfile? @relation(fields: [institutionId], references: [id], onDelete: SetNull)

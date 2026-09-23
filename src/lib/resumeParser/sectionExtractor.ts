@@ -39,14 +39,14 @@ export class ResumeParser {
 
     let currentSection = "unknown";
 
-    // Common section headers (case insensitive regex)
+    // Common section headers (case insensitive regex, optional trailing colon)
     const headerRegexes = [
-      { id: "summary", regex: /^(summary|profile|about me|objective)\s*$/i },
-      { id: "education", regex: /^(education|academic background|academics)\s*$/i },
-      { id: "experience", regex: /^(experience|work experience|employment|professional experience|history)\s*$/i },
-      { id: "skills", regex: /^(skills|technical skills|core competencies|technologies)\s*$/i },
-      { id: "projects", regex: /^(projects|personal projects|academic projects)\s*$/i },
-      { id: "certifications", regex: /^(certifications|certificates|licenses)\s*$/i },
+      { id: "summary", regex: /^(summary|profile|professional summary|about me|objective)[:]?\s*$/i },
+      { id: "education", regex: /^(education|academic background|academics)[:]?\s*$/i },
+      { id: "experience", regex: /^(experience|work experience|employment|professional experience|internships|history)[:]?\s*$/i },
+      { id: "skills", regex: /^(skills|technical skills|technologies|core competencies|tools & technologies|technical competencies)[:]?\s*$/i },
+      { id: "projects", regex: /^(projects|personal projects|academic projects|key projects)[:]?\s*$/i },
+      { id: "certifications", regex: /^(certifications|certificates|licenses|achievements)[:]?\s*$/i },
     ];
 
     // Simple line-by-line heuristic parsing
@@ -63,10 +63,15 @@ export class ResumeParser {
         }
       }
 
-      // Special case: if line is very short and ALL CAPS, it might be an unknown header
-      if (!isHeader && cleanLine.length < 20 && /^[A-Z\s]+$/.test(cleanLine)) {
-        // Skip it or assign to unknown if we want to be strict, 
-        // but for now we just append it to the current section.
+      // Special case: if line is very short and ALL CAPS or ends with colon, it might be an unknown header
+      if (!isHeader && cleanLine.length < 25 && (/^[A-Z\s:]+$/.test(cleanLine) || cleanLine.endsWith(':'))) {
+        for (const header of headerRegexes) {
+          if (cleanLine.toLowerCase().includes(header.id)) {
+            currentSection = header.id;
+            isHeader = true;
+            break;
+          }
+        }
       }
 
       if (!isHeader) {
@@ -77,12 +82,13 @@ export class ResumeParser {
     // Basic Contact Info Extraction
     const emailMatch = rawText.match(/([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9._-]+)/gi);
     const phoneMatch = rawText.match(/(\+?\d{1,3}[-.\s]?\(?\d{1,4}\)?[-.\s]?\d{1,4}[-.\s]?\d{1,9})/g);
+    const linkMatches = rawText.match(/(https?:\/\/[^\s]+|github\.com\/[^\s,|]+|linkedin\.com\/in\/[^\s,|]+)/gi) || [];
 
     return {
       contactInfo: {
         email: emailMatch ? emailMatch[0] : undefined,
         phone: phoneMatch ? phoneMatch[0] : undefined,
-        links: [] // URL extraction could go here
+        links: Array.from(new Set(linkMatches.map(l => l.replace(/[,|]$/, ''))))
       },
       summary: sections.summary.trim(),
       education: this.splitIntoBullets(sections.education),

@@ -8,11 +8,16 @@ const key = new TextEncoder().encode(secretKey);
 export async function middleware(request: NextRequest) {
   const session = request.cookies.get('session')?.value;
 
-  const isAuthPage = request.nextUrl.pathname.startsWith('/login') || request.nextUrl.pathname.startsWith('/register');
+  const isAuthPage = 
+    request.nextUrl.pathname.startsWith('/login') || 
+    request.nextUrl.pathname.startsWith('/register') ||
+    request.nextUrl.pathname.startsWith('/institute/login') ||
+    request.nextUrl.pathname.startsWith('/company/login');
+
   const isDashboardPage = 
     request.nextUrl.pathname.startsWith('/student') || 
-    request.nextUrl.pathname.startsWith('/company') || 
-    request.nextUrl.pathname.startsWith('/institute') ||
+    (request.nextUrl.pathname.startsWith('/company') && !request.nextUrl.pathname.startsWith('/company/login')) || 
+    (request.nextUrl.pathname.startsWith('/institute') && !request.nextUrl.pathname.startsWith('/institute/login')) ||
     request.nextUrl.pathname.startsWith('/admin');
 
   if (isAuthPage && session) {
