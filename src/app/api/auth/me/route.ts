@@ -5,8 +5,8 @@ import { prisma } from "@/lib/prisma";
 export async function GET(req: NextRequest) {
   const auth = await verifyAuth(req);
 
-  if (auth.error) {
-    return NextResponse.json({ error: auth.error, user: null }, { status: auth.status });
+  if (auth.error || !auth.user) {
+    return NextResponse.json({ error: auth.error || "Unauthorized", user: null }, { status: auth.status || 401 });
   }
 
   const user = await prisma.user.findUnique({

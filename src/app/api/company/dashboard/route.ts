@@ -90,8 +90,33 @@ export async function GET(request: Request) {
       company = { ...company, verificationStatus: "PENDING", verifiedAt: null };
     }
 
-    // Aggregate statistics
-    const jobs = company.jobs || [];
+    // Query all jobs for this company by companyId OR company name
+    const companyJobs = await prisma.jobPosting.findMany({
+      where: {
+        OR: [
+          { companyId: company.id },
+          { company: company.companyName }
+        ]
+      },
+      include: {
+        skills: { include: { skill: true } },
+        internshipApplications: {
+          include: {
+            student: {
+              include: {
+                user: { select: { email: true } },
+                skillScores: { include: { skill: true } }
+              }
+            }
+          },
+          orderBy: { appliedAt: "desc" }
+        }
+      },
+      orderBy: { postedAt: "desc" }
+    });
+
+    company = { ...company, jobs: companyJobs };
+    const jobs = companyJobs;
     const allApplications = jobs.flatMap((j: any) => 
       (j.internshipApplications || []).map((app: any) => ({
         ...app,

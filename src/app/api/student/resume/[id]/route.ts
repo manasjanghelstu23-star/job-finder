@@ -24,13 +24,13 @@ async function getStudentId() {
 
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const studentId = await getStudentId();
     if (!studentId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    const resumeId = params.id;
+    const { id: resumeId } = await params;
 
     // Verify ownership
     const resume = await prisma.resume.findUnique({

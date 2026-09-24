@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { 
   Search, 
   MapPin, 
@@ -52,9 +53,23 @@ import {
   Lock
 } from "lucide-react";
 
-export default function OpportunitiesPage() {
+function OpportunitiesContent() {
+  const searchParams = useSearchParams();
+  const applyJobIdParam = searchParams.get("applyJobId");
+
   const [opportunities, setOpportunities] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Auto-open application modal if navigated with ?applyJobId=...
+  useEffect(() => {
+    if (applyJobIdParam && opportunities.length > 0) {
+      const targetOpp = opportunities.find(o => o.job.id === applyJobIdParam);
+      if (targetOpp) {
+        setSelectedJobForApply(targetOpp.job);
+        setAppSubmissionSuccess(null);
+      }
+    }
+  }, [applyJobIdParam, opportunities]);
   
   // 5 Primary Navigation Tabs:
   // "openings" -> Real-Time Openings
@@ -806,6 +821,12 @@ export default function OpportunitiesPage() {
     }
 
     return true;
+  }).sort((a, b) => {
+    if (activeTab === "matches") {
+      return b.matchResult.matchScore - a.matchResult.matchScore;
+    }
+    // Real-time openings and internships: prioritize newest postings from companies first
+    return new Date(b.job.postedAt).getTime() - new Date(a.job.postedAt).getTime();
   });
 
   const clearAllFilters = () => {
@@ -2320,6 +2341,15 @@ export default function OpportunitiesPage() {
                               {isIntern ? "Internship / 0-1 Years" : job.experience || "1-3 Years"} (Skill Assessment Verified)
                             </div>
                           </div>
+
+                          {job.mentorName && (
+                            <div>
+                              <div className="font-bold text-gray-900 text-xs">Direct Mentor</div>
+                              <div className="text-gray-700 font-medium mt-0.5">
+                                {job.mentorName} {job.mentorDesignation ? `(${job.mentorDesignation})` : ""}
+                              </div>
+                            </div>
+                          )}
 
                           <div>
                             <div className="font-bold text-gray-900 text-xs mb-1.5">Required Skills</div>
@@ -4012,5 +4042,13 @@ export default function OpportunitiesPage() {
       )}
 
     </div>
+  );
+}
+
+export default function OpportunitiesPage() {
+  return (
+    <Suspense fallback={<div className="p-8 text-center text-sm text-gray-500">Loading Opportunities...</div>}>
+      <OpportunitiesContent />
+    </Suspense>
   );
 }

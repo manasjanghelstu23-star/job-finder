@@ -5,13 +5,15 @@ import { prisma } from "@/lib/prisma";
 export async function GET(req: NextRequest) {
   const auth = await verifyAuth(req, ["STUDENT"]);
 
-  if (auth.error) {
-    return NextResponse.json({ error: auth.error }, { status: auth.status });
+  if (auth.error || !auth.user) {
+    return NextResponse.json({ error: auth.error || "Unauthorized" }, { status: auth.status || 401 });
   }
+
+  const authUser = auth.user;
 
   try {
     const user = await prisma.user.findUnique({
-      where: { id: auth.user.id },
+      where: { id: authUser.id },
       include: {
         profile: true,
         studentProfile: {

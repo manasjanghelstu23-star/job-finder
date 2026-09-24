@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, use } from "react";
+import { useState, use, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Clock, AlertCircle, CheckCircle2 } from "lucide-react";
 
-export default function AssessmentPage({ params }: { params: Promise<{ id: string }> }) {
+function AssessmentContent({ params }: { params: Promise<{ id: string }> }) {
   // Use React.use() to unwrap params if needed in Next 15+ (App Router)
   const resolvedParams = use(params);
   const router = useRouter();
@@ -184,5 +184,13 @@ export default function AssessmentPage({ params }: { params: Promise<{ id: strin
       )}
 
     </div>
+  );
+}
+
+export default function AssessmentPage({ params }: { params: Promise<{ id: string }> }) {
+  return (
+    <Suspense fallback={<div className="p-8 text-center text-sm text-gray-500">Loading Assessment...</div>}>
+      <AssessmentContent params={params} />
+    </Suspense>
   );
 }

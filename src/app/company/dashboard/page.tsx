@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
 import { 
   Building2, 
@@ -57,28 +57,31 @@ import {
 } from "lucide-react";
 import { useSearchParams, useRouter } from "next/navigation";
 
-export default function CompanyDashboardPage() {
+function CompanyDashboardContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const tabParam = searchParams.get("tab");
 
-  // The 4 Primary Sections requested:
+  // The Primary Sections:
   // "home" -> Home / Company Overview & Telemetry
   // "employees" -> Employees / Workforce Intelligence & Database Employers
   // "job_postings" -> Job Posting / Published Internships & Shortage to Job
   // "applications" -> Applications / 2-Tier Candidate Ranking & Explainable Inspector
-  const [activeSection, setActiveSection] = useState<"home" | "employees" | "job_postings" | "applications">(
+  // "assessments" -> Skill Assessments & Canonical Question Bank
+  type DashboardSection = "home" | "employees" | "job_postings" | "applications" | "assessments";
+
+  const [activeSection, setActiveSection] = useState<DashboardSection>(
     (tabParam as any) || "home"
   );
 
   // Sync state if URL query param changes
   useEffect(() => {
-    if (tabParam && ["home", "employees", "job_postings", "applications"].includes(tabParam)) {
+    if (tabParam && ["home", "employees", "job_postings", "applications", "assessments"].includes(tabParam)) {
       setActiveSection(tabParam as any);
     }
   }, [tabParam]);
 
-  const handleTabChange = (section: "home" | "employees" | "job_postings" | "applications") => {
+  const handleTabChange = (section: DashboardSection) => {
     setActiveSection(section);
     router.push(`/company/dashboard?tab=${section}`);
   };
@@ -445,6 +448,7 @@ export default function CompanyDashboardPage() {
     try {
       const payload = {
         title: internshipPostForm.title,
+        companyName: company?.companyName || "Google Enterprise Partner",
         department: internshipPostForm.department,
         industry: internshipPostForm.industry,
         location: internshipPostForm.location,
@@ -744,6 +748,7 @@ export default function CompanyDashboardPage() {
 
       const payload = {
         title: `${jobDraftForm.title} (${jobDraftForm.hiringReason})`,
+        companyName: company?.companyName || "Google Enterprise Partner",
         department: jobDraftForm.department,
         industry: "Enterprise AI & Cloud Engineering",
         location: jobDraftForm.location,
@@ -906,6 +911,20 @@ export default function CompanyDashboardPage() {
           <span>Applications</span>
           <span className="ml-1 bg-purple-100 text-purple-800 text-[10px] font-mono font-bold px-2 py-0.5 rounded-full">
             {candidatesData?.candidates?.length || stats.totalApplications}
+          </span>
+        </button>
+
+        {/* Section 5: Assessments (Canonical Question Bank) */}
+        <button
+          onClick={() => { handleTabChange("assessments"); fetchQuestions(); }}
+          className={`flex items-center space-x-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+            activeSection === "assessments" ? "bg-white text-slate-900 shadow-xs font-black" : "text-gray-600 hover:text-gray-900"
+          }`}
+        >
+          <BrainCircuit className="w-4 h-4 text-amber-600" />
+          <span>Assessments</span>
+          <span className="ml-1 bg-amber-100 text-amber-800 text-[10px] font-bold px-2 py-0.5 rounded-full">
+            {questionsData?.length || 0} Questions
           </span>
         </button>
 
@@ -4803,5 +4822,13 @@ export default function CompanyDashboardPage() {
       )}
 
     </div>
+  );
+}
+
+export default function CompanyDashboardPage() {
+  return (
+    <Suspense fallback={<div className="p-8 text-center text-sm text-gray-500">Loading Company Dashboard...</div>}>
+      <CompanyDashboardContent />
+    </Suspense>
   );
 }

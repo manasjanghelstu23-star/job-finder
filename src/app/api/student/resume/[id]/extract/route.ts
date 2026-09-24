@@ -3,7 +3,26 @@ import { PrismaClient } from "@prisma/client";
 import { cookies } from "next/headers";
 import * as jose from "jose";
 import { readFile } from "fs/promises";
-const pdf = require("pdf-parse");
+if (typeof (globalThis as any).DOMMatrix === "undefined") {
+  (globalThis as any).DOMMatrix = class DOMMatrix {};
+}
+if (typeof (globalThis as any).ImageData === "undefined") {
+  (globalThis as any).ImageData = class ImageData {};
+}
+if (typeof (globalThis as any).Path2D === "undefined") {
+  (globalThis as any).Path2D = class Path2D {};
+}
+
+export const dynamic = "force-dynamic";
+
+let pdfParserFn: any = null;
+async function parsePdf(buffer: Buffer) {
+  if (!pdfParserFn) {
+    pdfParserFn = require("pdf-parse");
+  }
+  return await pdfParserFn(buffer);
+}
+
 import { ResumeParser } from "@/lib/resumeParser/sectionExtractor";
 import { SkillMatcher } from "@/lib/resumeParser/skillMatcher";
 import { ProfileMerger } from "@/lib/resumeParser/profileMerger";
@@ -47,13 +66,13 @@ async function getStudentId() {
 
 export async function POST(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const studentId = await getStudentId();
     if (!studentId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    const resumeId = params.id;
+    const { id: resumeId } = await params;
 
     // 1. Verify ownership and check status
     const resume = await prisma.resume.findUnique({
@@ -85,7 +104,7 @@ export async function POST(
     try {
       // 4. Read file and extract text (Phase 2)
       const dataBuffer = await readFile(resume.storageReference);
-      const data = await pdf(dataBuffer);
+      const data = await parsePdf(dataBuffer);
       
       const cleanText = data.text
         .replace(/\u0000/g, '')      

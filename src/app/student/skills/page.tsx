@@ -42,6 +42,8 @@ interface SkillScore {
   status: string;
   skill: { name: string, category: { name: string } };
   verification?: string;
+  assessedAt?: string | Date;
+  updatedAt?: string | Date;
 }
 
 const codingCategories: Record<string, string[]> = {

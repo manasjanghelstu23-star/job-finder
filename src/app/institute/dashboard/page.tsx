@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import {
   LayoutDashboard,
   GraduationCap,
@@ -64,7 +64,7 @@ type SectionType =
 
 type FacultySubTab = "internships" | "training" | "fdps" | "applications";
 
-export default function InstituteDashboardPage() {
+function InstituteDashboardContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -1846,5 +1846,13 @@ export default function InstituteDashboardPage() {
       )}
 
     </div>
+  );
+}
+
+export default function InstituteDashboardPage() {
+  return (
+    <Suspense fallback={<div className="p-8 text-center text-sm text-gray-500">Loading Institute Dashboard...</div>}>
+      <InstituteDashboardContent />
+    </Suspense>
   );
 }

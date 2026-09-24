@@ -1,74 +1,92 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import {
-  Users,
-  MessageSquare,
   Search,
-  Plus,
-  Sparkles,
-  TrendingUp,
-  Award,
-  Hash,
-  ArrowRight,
-  ExternalLink,
-  Check,
-  Send,
-  Heart,
-  MessageCircle,
-  Share2,
-  Bookmark,
-  Compass,
-  Code,
-  Palette,
-  Briefcase,
-  Terminal,
-  Cpu,
-  Volume2,
+  Bell,
+  Settings,
   Mic,
   MicOff,
   Headphones,
-  Settings,
+  Volume2,
+  Plus,
+  X,
+  Hash,
+  ChevronDown,
+  MessageSquare,
+  Send,
   Smile,
   Paperclip,
-  PhoneCall,
-  PhoneOff,
-  Radio,
-  Monitor,
-  MoreVertical,
-  ShieldAlert,
-  ShieldCheck,
-  Pin,
-  ChevronDown,
-  ChevronRight,
-  Bell,
-  X,
-  CheckCircle2,
-  Globe,
-  Lock,
-  Flame,
-  AtSign,
+  Check,
   Copy,
-  ThumbsUp,
-  Rocket,
-  CheckCheck,
+  Flame,
+  Sparkles,
+  Compass,
+  GraduationCap,
+  Cpu,
+  Briefcase,
+  TrendingUp,
+  Radio,
+  Users,
+  Shield,
+  ArrowLeft,
+  Bookmark,
+  User,
+  ExternalLink,
+  Code,
+  PhoneOff,
 } from "lucide-react";
 
 // ============================================================================
-// DATA MODELS & PRE-CONFIGURED DISCORD-STYLE SERVERS
+// TYPES & DATA STRUCTURES
 // ============================================================================
 
-interface Reaction {
-  emoji: string;
-  count: number;
-  reacted: boolean;
+interface Channel {
+  id: string;
+  name: string;
+  type: string;
+  position?: number;
+}
+
+interface Community {
+  id: string;
+  name: string;
+  shortName: string;
+  description: string;
+  icon: string;
+  banner: string;
+  category: string;
+  visibility: string;
+  memberCount: number;
+  onlineCount: number;
+  isJoined: boolean;
+  taggedSkills: string[];
+  channels: Channel[];
+}
+
+interface Moderator {
+  id: string;
+  name: string;
+  role: string;
+  status: "online" | "idle" | "offline";
+  time: string;
+  avatarBg: string;
+}
+
+interface Activity {
+  id: string;
+  user: string;
+  action: string;
+  detail: string;
+  time: string;
 }
 
 interface ChatMessage {
   id: string;
   author: string;
-  authorRole: "Owner" | "Admin" | "Mentor" | "Industry Partner" | "Student";
+  authorRole: string;
   authorRoleColor: string;
   avatarBg: string;
   avatarInitials: string;
@@ -85,1264 +103,1391 @@ interface ChatMessage {
     location: string;
     applyUrl: string;
   };
-  reactions: Reaction[];
-  repliesCount?: number;
+  reactions: Array<{ emoji: string; count: number; reacted: boolean }>;
 }
 
-interface Channel {
-  id: string;
-  name: string;
-  type: "text" | "voice";
-  topic?: string;
-  unreadCount?: number;
-}
+// ============================================================================
+// ACADEMIC, TECH, INDUSTRY, NEWS, JOBS & STUDENT SEED DATA
+// ============================================================================
 
-interface ChannelCategory {
-  name: string;
-  channels: Channel[];
-}
-
-interface CommunityServer {
-  id: string;
-  name: string;
-  initials: string;
-  badge: string;
-  color: string;
-  description: string;
-  category: string;
-  membersCount: number;
-  onlineCount: number;
-  isOwner?: boolean;
-  isJoined: boolean;
-  taggedSkills: string[];
-  channelCategories: ChannelCategory[];
-  members: Array<{
-    id: string;
-    name: string;
-    role: "Owner" | "Admin" | "Mentor" | "Industry Partner" | "Student";
-    status: "online" | "idle" | "offline";
-    avatarBg: string;
-  }>;
-}
-
-// Initial Mock Community Servers
-const INITIAL_SERVERS: CommunityServer[] = [
+const INITIAL_COMMUNITIES: Community[] = [
   {
-    id: "server-webdev",
-    name: "Full Stack & Web Dev Guild",
-    initials: "WD",
-    badge: "Official",
-    color: "from-blue-600 to-indigo-600",
-    description: "Modern web architecture, React 19, Next.js 15, Node.js microservices, and distributed deployments.",
-    category: "Engineering",
-    membersCount: 2450,
-    onlineCount: 48,
+    id: "comm-ai-ml",
+    name: "AI & Machine Learning Research Hub",
+    shortName: "AI & ML",
+    description: "Large language models, PyTorch benchmarks, GenAI agents, transformer pipelines, and academic research reading groups.",
+    icon: "AI",
+    banner: "/communities/techlab.jpg",
+    category: "Tech",
+    visibility: "PUBLIC",
+    memberCount: 184200,
+    onlineCount: 48200,
     isJoined: true,
-    taggedSkills: ["React", "Next.js", "TypeScript", "Node.js", "Tailwind CSS"],
-    channelCategories: [
-      {
-        name: "INFORMATION",
-        channels: [
-          { id: "welcome", name: "welcome", type: "text", topic: "Welcome to Web Dev Guild! Read community rules and introduce yourself." },
-          { id: "announcements", name: "announcements", type: "text", topic: "Official campus hackathons, workshops, and cohort updates.", unreadCount: 2 },
-          { id: "rules", name: "rules", type: "text", topic: "Code of conduct and collaboration guidelines." },
-        ],
-      },
-      {
-        name: "DISCUSSION",
-        channels: [
-          { id: "general", name: "general", type: "text", topic: "General web tech chatter, question help, and daily check-ins." },
-          { id: "frontend-react", name: "frontend-react", type: "text", topic: "React Server Components, Next.js routing, and state management." },
-          { id: "backend-apis", name: "backend-apis", type: "text", topic: "REST, GraphQL, Prisma ORM, and database indexing." },
-          { id: "project-collab", name: "project-collab", type: "text", topic: "Find co-founders, collaborators, and contributors for capstones." },
-        ],
-      },
-      {
-        name: "CAREER & INDUSTRY",
-        channels: [
-          { id: "jobs-internships", name: "jobs-internships", type: "text", topic: "Verified campus placements and remote developer internships.", unreadCount: 5 },
-          { id: "interview-prep", name: "interview-prep", type: "text", topic: "Frontend machine coding and full-stack behavioral prep." },
-        ],
-      },
-      {
-        name: "VOICE CHANNELS",
-        channels: [
-          { id: "voice-study-room", name: "Study Room (Lofi & Code)", type: "voice" },
-          { id: "voice-project-collab", name: "Project Standup", type: "voice" },
-          { id: "voice-lounge", name: "Watercooler Lounge", type: "voice" },
-        ],
-      },
-    ],
-    members: [
-      { id: "m1", name: "Vikram Rathore", role: "Owner", status: "online", avatarBg: "bg-blue-600 text-white" },
-      { id: "m2", name: "Neha Sharma", role: "Mentor", status: "online", avatarBg: "bg-emerald-600 text-white" },
-      { id: "m3", name: "Kunal Gupta (Google)", role: "Industry Partner", status: "online", avatarBg: "bg-amber-600 text-white" },
-      { id: "m4", name: "Ananya Sharma (You)", role: "Student", status: "online", avatarBg: "bg-indigo-600 text-white" },
-      { id: "m5", name: "Rohan Varma", role: "Student", status: "idle", avatarBg: "bg-purple-600 text-white" },
-      { id: "m6", name: "Priya Patel", role: "Student", status: "offline", avatarBg: "bg-slate-600 text-white" },
-      { id: "m7", name: "Devansh Mehta", role: "Student", status: "offline", avatarBg: "bg-slate-600 text-white" },
+    taggedSkills: ["Python", "PyTorch", "LLMs", "Transformers", "LangChain"],
+    channels: [
+      { id: "ch-ai-1", name: "announcements", type: "announcement" },
+      { id: "ch-ai-2", name: "general-ai", type: "text" },
+      { id: "ch-ai-3", name: "paper-reviews", type: "text" },
+      { id: "ch-ai-4", name: "genai-agents", type: "text" },
+      { id: "ch-ai-5", name: "AI Research Lab", type: "voice" },
     ],
   },
   {
-    id: "server-aiml",
-    name: "AI & Machine Learning Hub",
-    initials: "AI",
-    badge: "Research",
-    color: "from-purple-600 to-pink-600",
-    description: "Transformer pipelines, PyTorch benchmarks, GenAI agents, and collaborative Kaggle competitions.",
-    category: "Data & AI",
-    membersCount: 1890,
-    onlineCount: 31,
+    id: "comm-cloud-web",
+    name: "Full Stack & Cloud Architecture Guild",
+    shortName: "Cloud & Web",
+    description: "Distributed systems, React 19, Next.js 15, Kubernetes orchestration, Docker, microservices, and enterprise cloud infrastructure.",
+    icon: "CL",
+    banner: "/communities/hero.jpg",
+    category: "Tech",
+    visibility: "PUBLIC",
+    memberCount: 240500,
+    onlineCount: 62400,
     isJoined: true,
-    taggedSkills: ["Python", "PyTorch", "LLMs", "LangChain", "Vector DBs"],
-    channelCategories: [
-      {
-        name: "INFORMATION",
-        channels: [
-          { id: "ai-announcements", name: "ai-announcements", type: "text", topic: "Paper reading groups & GPU grants." },
-        ],
-      },
-      {
-        name: "RESEARCH & LABS",
-        channels: [
-          { id: "genai-agents", name: "genai-agents", type: "text", topic: "Building autonomous agents with Gemini and LangChain." },
-          { id: "paper-reviews", name: "paper-reviews", type: "text", topic: "Weekly arXiv breakdown sessions." },
-        ],
-      },
-      {
-        name: "VOICE CHANNELS",
-        channels: [
-          { id: "voice-ai-lab", name: "AI Hack Room", type: "voice" },
-        ],
-      },
-    ],
-    members: [
-      { id: "m20", name: "Dr. A. Sen", role: "Owner", status: "online", avatarBg: "bg-purple-700 text-white" },
-      { id: "m21", name: "Tanmay B.", role: "Mentor", status: "online", avatarBg: "bg-emerald-600 text-white" },
+    taggedSkills: ["React", "Next.js", "TypeScript", "Node.js", "Kubernetes", "AWS"],
+    channels: [
+      { id: "ch-cl-1", name: "announcements", type: "announcement" },
+      { id: "ch-cl-2", name: "web-architecture", type: "text" },
+      { id: "ch-cl-3", name: "backend-apis", type: "text" },
+      { id: "ch-cl-4", name: "system-design", type: "text" },
+      { id: "ch-cl-5", name: "Cloud War Room", type: "voice" },
     ],
   },
   {
-    id: "server-cloud",
-    name: "Cloud Architecture & DevOps",
-    initials: "CL",
-    badge: "Industry",
-    color: "from-sky-600 to-cyan-600",
-    description: "Kubernetes orchestration, Terraform CI/CD, AWS certifications, and enterprise cloud infrastructure.",
-    category: "Cloud",
-    membersCount: 940,
-    onlineCount: 17,
+    id: "comm-jobs-hub",
+    name: "Industry Placement & Internship Hub",
+    shortName: "Jobs & Careers",
+    description: "Tier-1 placement drives, FAANG interview machines, verified campus hiring alerts, resume ATS scoring, and corporate referrals.",
+    icon: "JB",
+    banner: "/communities/jobs.jpg",
+    category: "Jobs",
+    visibility: "PUBLIC",
+    memberCount: 160800,
+    onlineCount: 35800,
     isJoined: true,
-    taggedSkills: ["AWS", "Docker", "Kubernetes", "Terraform", "CI/CD"],
-    channelCategories: [
-      {
-        name: "DISCUSSIONS",
-        channels: [
-          { id: "aws-certifications", name: "aws-certs", type: "text", topic: "Solutions Architect associate revision." },
-          { id: "docker-k8s", name: "docker-k8s", type: "text", topic: "Cluster configurations & Helm charts." },
-        ],
-      },
-      {
-        name: "VOICE",
-        channels: [
-          { id: "voice-infra", name: "Infra War Room", type: "voice" },
-        ],
-      },
-    ],
-    members: [
-      { id: "m30", name: "Sahil Khan", role: "Owner", status: "online", avatarBg: "bg-cyan-600 text-white" },
+    taggedSkills: ["Data Structures", "Algorithms", "System Design", "Behavioral Prep", "Resume Building"],
+    channels: [
+      { id: "ch-jb-1", name: "job-alerts", type: "announcement" },
+      { id: "ch-jb-2", name: "interview-experiences", type: "text" },
+      { id: "ch-jb-3", name: "resume-reviews", type: "text" },
+      { id: "ch-jb-4", name: "company-hiring", type: "text" },
+      { id: "ch-jb-5", name: "Mock Interview Room", type: "voice" },
     ],
   },
   {
-    id: "server-placements",
-    name: "Placement & DSA Sprint 2026",
-    initials: "DS",
-    badge: "Placements",
-    color: "from-emerald-600 to-teal-600",
-    description: "Daily LeetCode patterns, system design mock interviews, campus recruiting debriefs, and salary negotiation.",
-    category: "Career",
-    membersCount: 4200,
-    onlineCount: 78,
-    isJoined: false,
-    taggedSkills: ["DSA", "LeetCode", "System Design", "Java", "C++"],
-    channelCategories: [
-      {
-        name: "INTERVIEW PREP",
-        channels: [
-          { id: "daily-problem", name: "daily-problem", type: "text", topic: "Daily LeetCode challenge discussion." },
-          { id: "mock-interviews", name: "mock-interviews", type: "text", topic: "Schedule 1v1 mock interviews with peers." },
-        ],
-      },
+    id: "comm-sih-labs",
+    name: "Smart India Hackathon & Innovation Labs",
+    shortName: "Education & SIH",
+    description: "National hackathon team formation, patent filing guidance, startup incubators, capstone mentoring, and government project grants.",
+    icon: "SIH",
+    banner: "/communities/techlab.jpg",
+    category: "Education",
+    visibility: "PUBLIC",
+    memberCount: 115400,
+    onlineCount: 28500,
+    isJoined: true,
+    taggedSkills: ["Rapid Prototyping", "IoT", "AI/ML", "Product Design", "Pitching"],
+    channels: [
+      { id: "ch-sh-1", name: "announcements", type: "announcement" },
+      { id: "ch-sh-2", name: "team-formation", type: "text" },
+      { id: "ch-sh-3", name: "mentor-guidance", type: "text" },
+      { id: "ch-sh-4", name: "project-showcase", type: "text" },
+      { id: "ch-sh-5", name: "Hackathon War Room", type: "voice" },
     ],
-    members: [
-      { id: "m40", name: "Rishabh Malhotra", role: "Owner", status: "online", avatarBg: "bg-emerald-600 text-white" },
+  },
+  {
+    id: "comm-industry-mentors",
+    name: "Global Industry Leaders & Mentors Guild",
+    shortName: "Industry Connect",
+    description: "Connect directly with engineering VPs, research scientists, and product leads across top multinational enterprises.",
+    icon: "IND",
+    banner: "/communities/jobs.jpg",
+    category: "Industry",
+    visibility: "PUBLIC",
+    memberCount: 78200,
+    onlineCount: 14200,
+    isJoined: true,
+    taggedSkills: ["Career Strategy", "Leadership", "Enterprise Systems", "Networking"],
+    channels: [
+      { id: "ch-in-1", name: "executive-talks", type: "announcement" },
+      { id: "ch-in-2", name: "mentor-connect", type: "text" },
+      { id: "ch-in-3", name: "ask-an-industry-expert", type: "text" },
+      { id: "ch-in-4", name: "Executive Lounge", type: "voice" },
+    ],
+  },
+  {
+    id: "comm-campus-news",
+    name: "Campus Tech News & Placements Bulletin",
+    shortName: "Campus News",
+    description: "Real-time updates on campus placement statistics, hiring trends, tech breakthroughs, conferences, and startup funding.",
+    icon: "NEWS",
+    banner: "/communities/hero.jpg",
+    category: "News",
+    visibility: "PUBLIC",
+    memberCount: 52900,
+    onlineCount: 8900,
+    isJoined: true,
+    taggedSkills: ["Industry Trends", "Tech News", "Placement Analytics"],
+    channels: [
+      { id: "ch-nw-1", name: "breaking-bulletins", type: "announcement" },
+      { id: "ch-nw-2", name: "placement-statistics", type: "text" },
+      { id: "ch-nw-3", name: "tech-trends-2026", type: "text" },
+      { id: "ch-nw-4", name: "Daily News Brief", type: "voice" },
     ],
   },
 ];
 
-// Initial Messages Map by Channel
-const INITIAL_MESSAGES: Record<string, ChatMessage[]> = {
+const INITIAL_MODERATORS: Moderator[] = [
+  { id: "mod-1", name: "Dr. Vikram Rao", role: "Industry Lead • Google", status: "online", time: "Now", avatarBg: "from-blue-600 to-indigo-600" },
+  { id: "mod-2", name: "Prof. Alok Sen", role: "Head of CS Labs", status: "online", time: "8m ago", avatarBg: "from-purple-600 to-fuchsia-600" },
+  { id: "mod-3", name: "Neha Sharma", role: "Tier-1 Placement Mentor", status: "idle", time: "25m ago", avatarBg: "from-emerald-600 to-teal-600" },
+  { id: "mod-4", name: "Campus Placement Bot", role: "Verified System Admin", status: "online", time: "Now", avatarBg: "from-cyan-600 to-blue-600" },
+];
+
+const INITIAL_RECENT_ACTIVITY: Activity[] = [
+  { id: "act-1", user: "Dr. Vikram Rao (Google)", action: "Posted 12 Cloud Internships in #job-alerts", detail: "Stipend: ₹45,000/mo • Hybrid Bengaluru", time: "2m ago" },
+  { id: "act-2", user: "Ananya Sharma", action: "Published capstone project in #project-showcase", detail: "Autonomous Agent Multi-Node Mesh", time: "8m ago" },
+  { id: "act-3", user: "Rohan Varma", action: "Received SDE Internship Offer from Microsoft", detail: "Tier-1 Campus Placement Drive 2026", time: "18m ago" },
+  { id: "act-4", user: "Priya Patel", action: "Shared Google machine coding prep in #interview-experiences", detail: "15 DSA questions + dynamic programming notes", time: "31m ago" },
+];
+
+const INITIAL_CHANNEL_MESSAGES: Record<string, ChatMessage[]> = {
   general: [
     {
       id: "msg-1",
-      author: "Vikram Rathore",
-      authorRole: "Owner",
-      authorRoleColor: "text-blue-600 bg-blue-50 dark:bg-blue-950 border-blue-200 dark:border-blue-800",
+      author: "Dr. Vikram Rao",
+      authorRole: "Industry Lead • Google",
+      authorRoleColor: "text-blue-400 bg-blue-950/70 border-blue-700/60",
       avatarBg: "bg-blue-600 text-white",
       avatarInitials: "VR",
       timestamp: "Today at 10:14 AM",
-      content: "Welcome to the Web Dev Guild everyone! Reminder that our weekly production architectures review is tomorrow at 5 PM IST.",
-      reactions: [
-        { emoji: "🚀", count: 12, reacted: false },
-        { emoji: "👏", count: 7, reacted: true },
-      ],
-      repliesCount: 3,
-    },
-    {
-      id: "msg-2",
-      author: "Kunal Gupta (Google)",
-      authorRole: "Industry Partner",
-      authorRoleColor: "text-amber-700 bg-amber-50 dark:bg-amber-950 border-amber-200 dark:border-amber-800",
-      avatarBg: "bg-amber-600 text-white",
-      avatarInitials: "KG",
-      timestamp: "Today at 10:28 AM",
-      content: "Quick tip for candidates building full-stack capstone projects: Avoid storing JWT tokens in localStorage. Use HttpOnly cookies with CSRF protection, especially if you want your security architecture to stand out in interviews!",
-      codeSnippet: {
-        lang: "typescript",
-        code: `// Recommended pattern in Next.js Server Actions\nimport { cookies } from 'next/headers';\n\nexport async function setAuthSession(token: string) {\n  const cookieStore = await cookies();\n  cookieStore.set('session', token, {\n    httpOnly: true,\n    secure: process.env.NODE_ENV === 'production',\n    sameSite: 'lax',\n    path: '/',\n  });\n}`,
-      },
-      reactions: [
-        { emoji: "🔥", count: 18, reacted: true },
-        { emoji: "💡", count: 15, reacted: false },
-        { emoji: "❤️", count: 9, reacted: false },
-      ],
-      repliesCount: 6,
-    },
-    {
-      id: "msg-3",
-      author: "Neha Sharma",
-      authorRole: "Mentor",
-      authorRoleColor: "text-emerald-700 bg-emerald-50 dark:bg-emerald-950 border-emerald-200 dark:border-emerald-800",
-      avatarBg: "bg-emerald-600 text-white",
-      avatarInitials: "NS",
-      timestamp: "Today at 10:35 AM",
-      content: "Has anyone benchmarked Redis vs Memcached for session token invalidation in distributed environments?",
-      reactions: [
-        { emoji: "👍", count: 4, reacted: false },
-      ],
-    },
-  ],
-  "jobs-internships": [
-    {
-      id: "job-1",
-      author: "EduLearn Placement Desk",
-      authorRole: "Admin",
-      authorRoleColor: "text-purple-700 bg-purple-50 dark:bg-purple-950 border-purple-200 dark:border-purple-800",
-      avatarBg: "bg-purple-600 text-white",
-      avatarInitials: "ED",
-      timestamp: "Today at 9:00 AM",
-      content: "📢 New Verified Off-Campus Internship Opportunity posted on the platform! Direct fast-track for guild members with verified React & Next.js skills.",
+      content: "Welcome to the AI & Machine Learning Research Hub! Our engineering team at Google is reviewing student capstone models this semester for direct summer internship tracks. Check the verified posting below:",
       jobCard: {
-        company: "PixelCraft Interactive",
-        title: "Frontend Engineering Intern (React 19 / TypeScript)",
-        stipend: "₹35,000 / month",
-        location: "Remote / Hybrid (Bangalore)",
+        company: "Google Enterprise Partner",
+        title: "Autonomous Systems & ML Research Intern",
+        stipend: "₹45,000/month",
+        location: "Hybrid / Bengaluru (or Remote)",
         applyUrl: "/student/opportunities",
       },
       reactions: [
-        { emoji: "🚀", count: 24, reacted: true },
-        { emoji: "💼", count: 19, reacted: false },
+        { emoji: "⚡", count: 24, reacted: true },
+        { emoji: "🚀", count: 38, reacted: false },
+        { emoji: "🙌", count: 19, reacted: true },
       ],
-      repliesCount: 4,
     },
-  ],
-  announcements: [
     {
-      id: "ann-1",
-      author: "Vikram Rathore",
-      authorRole: "Owner",
-      authorRoleColor: "text-blue-600 bg-blue-50 dark:bg-blue-950 border-blue-200 dark:border-blue-800",
-      avatarBg: "bg-blue-600 text-white",
-      avatarInitials: "VR",
-      timestamp: "Yesterday at 6:00 PM",
-      content: "🚨 Hackathon Registration Open: The 2026 Inter-College Web Innovation sprint begins next weekend. Teams of 2–4 can register under the #project-collab channel.",
+      id: "msg-2",
+      author: "Prof. Alok Sen",
+      authorRole: "Head of CS Labs",
+      authorRoleColor: "text-purple-300 bg-purple-950/70 border-purple-700/60",
+      avatarBg: "bg-purple-600 text-white",
+      avatarInitials: "AS",
+      timestamp: "Today at 11:30 AM",
+      content: "Here is the PyTorch distributed transformer training script for our Smart India Hackathon research cohort:",
+      codeSnippet: {
+        lang: "python",
+        code: `import torch\nimport torch.distributed as dist\nfrom torch.nn.parallel import DistributedDataParallel as DDP\n\ndef init_cluster_node(rank, world_size):\n    dist.init_process_group("nccl", rank=rank, world_size=world_size)\n    torch.cuda.set_device(rank)\n    print(f"[Node {rank}] Multi-GPU distributed tensor backend ready.")`,
+      },
       reactions: [
-        { emoji: "🔥", count: 32, reacted: true },
-        { emoji: "🎉", count: 28, reacted: false },
+        { emoji: "❤️", count: 15, reacted: false },
+        { emoji: "💻", count: 29, reacted: true },
       ],
     },
   ],
 };
 
-export default function CommunitiesPage() {
-  const [servers, setServers] = useState<CommunityServer[]>(INITIAL_SERVERS);
-  const [activeServerId, setActiveServerId] = useState<string>("server-webdev");
+export default function StudentCommunitiesPage() {
+  // Navigation & View States
+  const [currentView, setCurrentView] = useState<"explore" | "server">("explore");
+  const [activeCategory, setActiveCategory] = useState<string>("Home");
+  const [searchQuery, setSearchQuery] = useState<string>("");
+
+  // Communities State initialized with academic & industry default data
+  const [communities, setCommunities] = useState<Community[]>(INITIAL_COMMUNITIES);
+  const [featured, setFeatured] = useState<Community[]>(INITIAL_COMMUNITIES.slice(0, 2));
+  const [popular, setPopular] = useState<Community[]>(INITIAL_COMMUNITIES.slice(2, 4));
+  const [recent, setRecent] = useState<Community[]>(INITIAL_COMMUNITIES.slice(4));
+  const [moderators, setModerators] = useState<Moderator[]>(INITIAL_MODERATORS);
+  const [recentActivity, setRecentActivity] = useState<Activity[]>(INITIAL_RECENT_ACTIVITY);
+
+  // Active Server & Channel Chat State
+  const [activeServer, setActiveServer] = useState<Community | null>(INITIAL_COMMUNITIES[0]);
   const [activeChannelId, setActiveChannelId] = useState<string>("general");
-  const [currentView, setCurrentView] = useState<"server" | "discover">("server");
-  const [showMembersList, setShowMembersList] = useState(true);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [discoverCategory, setDiscoverCategory] = useState("All");
+  const [chatMessages, setChatMessages] = useState<Record<string, ChatMessage[]>>(INITIAL_CHANNEL_MESSAGES);
+  const [inputMessage, setInputMessage] = useState<string>("");
+  const [showEmojiPicker, setShowEmojiPicker] = useState<boolean>(false);
+  const [copiedCodeId, setCopiedCodeId] = useState<string | null>(null);
 
-  // Messaging State
-  const [messages, setMessages] = useState<Record<string, ChatMessage[]>>(INITIAL_MESSAGES);
-  const [chatInputText, setChatInputText] = useState("");
-  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
-  const chatScrollRef = useRef<HTMLDivElement>(null);
-
-  // Voice Channel State
-  const [connectedVoiceChannel, setConnectedVoiceChannel] = useState<string | null>(null);
-  const [isMuted, setIsMuted] = useState(false);
-  const [isDeafened, setIsDeafened] = useState(false);
-  const [isScreenSharing, setIsScreenSharing] = useState(false);
+  // Audio / User Controls State
+  const [isMuted, setIsMuted] = useState<boolean>(false);
+  const [isDeafened, setIsDeafened] = useState<boolean>(false);
+  const [connectedVoice, setConnectedVoice] = useState<string | null>(null);
 
   // Create Community Modal State
-  const [showCreateModal, setShowCreateModal] = useState(false);
-  const [newCommunityName, setNewCommunityName] = useState("");
-  const [newCommunityDesc, setNewCommunityDesc] = useState("");
-  const [newCommunityCategory, setNewCommunityCategory] = useState("Engineering");
-  const [newCommunityVisibility, setNewCommunityVisibility] = useState<"public" | "private">("public");
-  const [newCommunitySkills, setNewCommunitySkills] = useState("");
+  const [showCreateModal, setShowCreateModal] = useState<boolean>(false);
+  const [newCommunityName, setNewCommunityName] = useState<string>("");
+  const [newCommunityDesc, setNewCommunityDesc] = useState<string>("");
+  const [newCommunityCategory, setNewCommunityCategory] = useState<string>("Tech");
+  const [newCommunitySkills, setNewCommunitySkills] = useState<string>("");
 
-  const activeServer = servers.find((s) => s.id === activeServerId) || servers[0];
+  const chatBottomRef = useRef<HTMLDivElement>(null);
 
-  // Find active channel
-  let activeChannel: Channel | undefined;
-  activeServer.channelCategories.forEach((cat) => {
-    const found = cat.channels.find((ch) => ch.id === activeChannelId);
-    if (found) activeChannel = found;
-  });
+  // ============================================================================
+  // LOAD LIVE DATA FROM BACKEND API
+  // ============================================================================
 
-  // Auto-scroll chat to bottom
   useEffect(() => {
-    if (chatScrollRef.current) {
-      chatScrollRef.current.scrollTop = chatScrollRef.current.scrollHeight;
-    }
-  }, [messages, activeChannelId]);
+    async function loadCommunities() {
+      try {
+        const res = await fetch("/api/communities");
+        const data = await res.json();
+        if (data.success && data.communities && data.communities.length > 0) {
+          setCommunities(data.communities);
+          setFeatured(data.featured || data.communities.slice(0, 2));
+          setPopular(data.popular || data.communities.slice(2, 4));
+          setRecent(data.recent || data.communities.slice(4));
+          if (data.moderators) setModerators(data.moderators);
+          if (data.recentActivity) setRecentActivity(data.recentActivity);
 
-  // Send Message
-  const handleSendMessage = (e?: React.FormEvent) => {
+          if (!activeServer && data.communities.length > 0) {
+            setActiveServer(data.communities[0]);
+          }
+        }
+      } catch (err) {
+        console.error("Failed to sync communities from backend:", err);
+      }
+    }
+    loadCommunities();
+  }, []);
+
+  useEffect(() => {
+    if (currentView === "server") {
+      chatBottomRef.current?.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [chatMessages, activeChannelId, currentView]);
+
+  // ============================================================================
+  // HANDLERS
+  // ============================================================================
+
+  const handleOpenServer = (server: Community) => {
+    setActiveServer(server);
+    const firstTextChannel = server.channels.find((ch) => ch.type === "text") || server.channels[0];
+    setActiveChannelId(firstTextChannel?.id || "general");
+    setCurrentView("server");
+  };
+
+  const handleSendMessage = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
-    if (!chatInputText.trim()) return;
+    if (!inputMessage.trim() || !activeServer) return;
+
+    const messageText = inputMessage.trim();
+    setInputMessage("");
+    setShowEmojiPicker(false);
 
     const newMsg: ChatMessage = {
       id: `msg-${Date.now()}`,
-      author: "Ananya Sharma (You)",
-      authorRole: "Student",
-      authorRoleColor: "text-indigo-600 bg-indigo-50 dark:bg-indigo-950 border-indigo-200 dark:border-indigo-800",
-      avatarBg: "bg-indigo-600 text-white",
-      avatarInitials: "AS",
+      author: "Viktor Bateman",
+      authorRole: "Student Mentor",
+      authorRoleColor: "text-fuchsia-400 bg-fuchsia-950/70 border-fuchsia-700/60",
+      avatarBg: "bg-fuchsia-600 text-white",
+      avatarInitials: "VB",
       timestamp: "Just now",
-      content: chatInputText,
+      content: messageText,
       reactions: [],
     };
 
-    setMessages((prev) => ({
+    // Optimistic UI update
+    setChatMessages((prev) => ({
       ...prev,
       [activeChannelId]: [...(prev[activeChannelId] || []), newMsg],
     }));
 
-    setChatInputText("");
-    setShowEmojiPicker(false);
+    // Post to backend database
+    try {
+      await fetch(`/api/communities/${activeServer.id}/messages`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          channelId: activeChannelId,
+          content: messageText,
+        }),
+      });
+    } catch (err) {
+      console.error("Failed to save message to backend:", err);
+    }
   };
 
-  // Toggle Reaction
   const handleToggleReaction = (messageId: string, emoji: string) => {
-    setMessages((prev) => {
+    setChatMessages((prev) => {
       const channelMsgs = prev[activeChannelId] || [];
       const updated = channelMsgs.map((msg) => {
         if (msg.id !== messageId) return msg;
-
-        const existingReaction = msg.reactions.find((r) => r.emoji === emoji);
-        let newReactions: Reaction[];
-
-        if (existingReaction) {
+        const exists = msg.reactions.find((r) => r.emoji === emoji);
+        let newReactions;
+        if (exists) {
           newReactions = msg.reactions
             .map((r) =>
               r.emoji === emoji
-                ? {
-                    ...r,
-                    count: r.reacted ? r.count - 1 : r.count + 1,
-                    reacted: !r.reacted,
-                  }
+                ? { ...r, count: r.reacted ? r.count - 1 : r.count + 1, reacted: !r.reacted }
                 : r
             )
             .filter((r) => r.count > 0);
         } else {
           newReactions = [...msg.reactions, { emoji, count: 1, reacted: true }];
         }
-
         return { ...msg, reactions: newReactions };
       });
-
       return { ...prev, [activeChannelId]: updated };
     });
   };
 
-  // Voice Channel Join / Leave
-  const handleVoiceChannelClick = (channel: Channel) => {
-    if (connectedVoiceChannel === channel.name) {
-      setConnectedVoiceChannel(null);
-    } else {
-      setConnectedVoiceChannel(channel.name);
-    }
-  };
-
-  // Join / Leave Community from Discover
-  const handleToggleJoinServer = (serverId: string) => {
-    setServers((prev) =>
-      prev.map((s) =>
-        s.id === serverId
-          ? {
-              ...s,
-              isJoined: !s.isJoined,
-              membersCount: s.isJoined ? s.membersCount - 1 : s.membersCount + 1,
-            }
-          : s
-      )
-    );
-  };
-
-  // Create New Community Handler
-  const handleCreateCommunity = (e: React.FormEvent) => {
+  const handleCreateCommunitySubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newCommunityName.trim()) return;
 
-    const skillsArray = newCommunitySkills
-      .split(",")
-      .map((s) => s.trim())
-      .filter(Boolean);
-
-    const newServer: CommunityServer = {
-      id: `server-${Date.now()}`,
-      name: newCommunityName,
-      initials: newCommunityName.slice(0, 2).toUpperCase(),
-      badge: "Community",
-      color: "from-emerald-600 to-teal-600",
-      description: newCommunityDesc || "Student-led learning guild.",
-      category: newCommunityCategory,
-      membersCount: 1,
-      onlineCount: 1,
-      isOwner: true,
-      isJoined: true,
-      taggedSkills: skillsArray.length ? skillsArray : ["General", "Collaboration"],
-      channelCategories: [
-        {
-          name: "INFORMATION",
-          channels: [
-            { id: "welcome", name: "welcome", type: "text", topic: `Welcome to ${newCommunityName}!` },
-            { id: "announcements", name: "announcements", type: "text", topic: "Community updates and news." },
-          ],
-        },
-        {
-          name: "DISCUSSION",
-          channels: [
-            { id: "general", name: "general", type: "text", topic: "General discussions and peer Q&A." },
-          ],
-        },
-        {
-          name: "VOICE",
-          channels: [
-            { id: "voice-general", name: "General Voice", type: "voice" },
-          ],
-        },
-      ],
-      members: [
-        { id: "self", name: "Ananya Sharma (You)", role: "Owner", status: "online", avatarBg: "bg-emerald-600 text-white" },
-      ],
-    };
-
-    setServers([newServer, ...servers]);
-    setActiveServerId(newServer.id);
-    setActiveChannelId("general");
-    setCurrentView("server");
-    setShowCreateModal(false);
-
-    // Reset Form
-    setNewCommunityName("");
-    setNewCommunityDesc("");
-    setNewCommunitySkills("");
+    try {
+      const res = await fetch("/api/communities", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: newCommunityName,
+          description: newCommunityDesc,
+          category: newCommunityCategory,
+          skills: newCommunitySkills,
+        }),
+      });
+      const data = await res.json();
+      if (data.success && data.community) {
+        setCommunities((prev) => [data.community, ...prev]);
+        setShowCreateModal(false);
+        setNewCommunityName("");
+        setNewCommunityDesc("");
+        setNewCommunitySkills("");
+        handleOpenServer(data.community);
+      }
+    } catch (err) {
+      console.error("Failed to create community:", err);
+    }
   };
 
-  const channelMessages = messages[activeChannelId] || [];
+  const copyCode = (code: string, id: string) => {
+    navigator.clipboard.writeText(code);
+    setCopiedCodeId(id);
+    setTimeout(() => setCopiedCodeId(null), 2000);
+  };
+
+  // Filter explore cards strictly based on Education, Tech, Industry, News, Jobs, Students
+  const filteredCommunities = communities.filter((c) => {
+    const catLower = c.category.toLowerCase();
+    const matchesCategory =
+      activeCategory === "Home" ||
+      (activeCategory === "Education" && catLower.includes("education")) ||
+      (activeCategory === "Tech" && (catLower.includes("tech") || catLower.includes("engineering"))) ||
+      (activeCategory === "Industry" && catLower.includes("industry")) ||
+      (activeCategory === "Jobs" && catLower.includes("jobs")) ||
+      (activeCategory === "News" && catLower.includes("news")) ||
+      (activeCategory === "Students" && (catLower.includes("student") || catLower.includes("education") || catLower.includes("tech")));
+
+    const matchesSearch =
+      !searchQuery.trim() ||
+      c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      c.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      c.taggedSkills.some((s) => s.toLowerCase().includes(searchQuery.toLowerCase()));
+
+    return matchesCategory && matchesSearch;
+  });
 
   return (
-    <div className="h-[calc(100vh-130px)] min-h-[640px] max-w-7xl mx-auto rounded-3xl bg-slate-900 border border-slate-800 shadow-2xl overflow-hidden flex flex-col font-sans select-none text-slate-200">
+    <div className="min-h-screen bg-[#0d0519] text-slate-100 flex flex-col font-sans select-none antialiased relative overflow-hidden">
+      {/* Background Ambient Glow Orbs */}
+      <div className="absolute top-[-150px] left-[15%] w-[600px] h-[600px] rounded-full bg-purple-700/20 blur-[130px] pointer-events-none" />
+      <div className="absolute bottom-[-150px] right-[10%] w-[550px] h-[550px] rounded-full bg-fuchsia-600/15 blur-[140px] pointer-events-none" />
+      <div className="absolute top-[40%] right-[35%] w-[450px] h-[450px] rounded-full bg-indigo-600/10 blur-[120px] pointer-events-none" />
+
       {/* =====================================================================
-          1. CREATE COMMUNITY MODAL
+          TOP APP WINDOW BAR (macOS dots, Search pill, Quick actions)
          ===================================================================== */}
-      {showCreateModal && (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-xs z-50 flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-700 rounded-3xl shadow-2xl max-w-lg w-full p-6 sm:p-7 space-y-5 animate-in fade-in-50 duration-200">
-            <div className="flex justify-between items-center border-b border-slate-800 pb-4">
-              <div>
-                <h3 className="text-xl font-black text-white">Create a Community</h3>
-                <p className="text-xs text-slate-400 mt-0.5">
-                  Launch a new student learning circle, college club, or project team.
-                </p>
-              </div>
+      <header className="h-14 bg-[#140a24]/90 backdrop-blur-md border-b border-white/10 px-5 flex items-center justify-between shrink-0 z-30">
+        {/* Left Window Dots & Brand Title */}
+        <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-2">
+            <span className="w-3 h-3 rounded-full bg-[#ff5f56] border border-[#e0443e]/40 shadow-xs inline-block" />
+            <span className="w-3 h-3 rounded-full bg-[#ffbd2e] border border-[#dea123]/40 shadow-xs inline-block" />
+            <span className="w-3 h-3 rounded-full bg-[#27c93f] border border-[#1aab29]/40 shadow-xs inline-block" />
+          </div>
+          <span className="text-white/40 text-xs font-semibold">|</span>
+          <div className="flex items-center space-x-2">
+            <h1 className="text-sm font-bold tracking-wide text-white">
+              {currentView === "explore" ? "Explore Communities" : activeServer?.name || "Server"}
+            </h1>
+            {currentView === "server" && (
               <button
-                onClick={() => setShowCreateModal(false)}
-                className="w-8 h-8 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center"
+                onClick={() => setCurrentView("explore")}
+                className="flex items-center space-x-1 px-2.5 py-1 rounded-lg bg-white/10 hover:bg-white/15 text-xs text-purple-200 transition-colors cursor-pointer"
               >
-                <X className="w-4 h-4" />
+                <ArrowLeft className="w-3 h-3" />
+                <span>Back to Explore</span>
               </button>
-            </div>
-
-            <form onSubmit={handleCreateCommunity} className="space-y-4 text-xs">
-              <div>
-                <label className="font-bold text-slate-300 block mb-1.5 uppercase tracking-wider text-[11px]">
-                  Community Name *
-                </label>
-                <input
-                  type="text"
-                  required
-                  placeholder="e.g. Distributed Systems Lab, UI/UX Guild"
-                  value={newCommunityName}
-                  onChange={(e) => setNewCommunityName(e.target.value)}
-                  className="w-full rounded-2xl bg-slate-800 border border-slate-700 px-4 py-3 text-xs text-white placeholder-slate-500 focus:outline-hidden focus:border-blue-500"
-                />
-              </div>
-
-              <div>
-                <label className="font-bold text-slate-300 block mb-1.5 uppercase tracking-wider text-[11px]">
-                  Description
-                </label>
-                <textarea
-                  rows={2}
-                  placeholder="What is this community about? Who should join?"
-                  value={newCommunityDesc}
-                  onChange={(e) => setNewCommunityDesc(e.target.value)}
-                  className="w-full rounded-2xl bg-slate-800 border border-slate-700 p-3 text-xs text-white placeholder-slate-500 focus:outline-hidden focus:border-blue-500"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="font-bold text-slate-300 block mb-1.5 uppercase tracking-wider text-[11px]">
-                    Category
-                  </label>
-                  <select
-                    value={newCommunityCategory}
-                    onChange={(e) => setNewCommunityCategory(e.target.value)}
-                    className="w-full rounded-2xl bg-slate-800 border border-slate-700 p-3 text-xs text-white focus:outline-hidden focus:border-blue-500"
-                  >
-                    <option value="Engineering">Engineering &amp; Code</option>
-                    <option value="Data & AI">Data &amp; AI</option>
-                    <option value="Cloud">Cloud &amp; DevOps</option>
-                    <option value="Career">Career &amp; Placements</option>
-                    <option value="Design">Design &amp; Product</option>
-                    <option value="Open Source">Open Source</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="font-bold text-slate-300 block mb-1.5 uppercase tracking-wider text-[11px]">
-                    Visibility
-                  </label>
-                  <div className="flex space-x-2 pt-1">
-                    <button
-                      type="button"
-                      onClick={() => setNewCommunityVisibility("public")}
-                      className={`flex-1 py-2 rounded-xl font-bold flex items-center justify-center space-x-1 border ${
-                        newCommunityVisibility === "public"
-                          ? "bg-blue-600 text-white border-blue-500"
-                          : "bg-slate-800 text-slate-400 border-slate-700"
-                      }`}
-                    >
-                      <Globe className="w-3.5 h-3.5" />
-                      <span>Public</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setNewCommunityVisibility("private")}
-                      className={`flex-1 py-2 rounded-xl font-bold flex items-center justify-center space-x-1 border ${
-                        newCommunityVisibility === "private"
-                          ? "bg-blue-600 text-white border-blue-500"
-                          : "bg-slate-800 text-slate-400 border-slate-700"
-                      }`}
-                    >
-                      <Lock className="w-3.5 h-3.5" />
-                      <span>Private</span>
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              <div>
-                <label className="font-bold text-slate-300 block mb-1.5 uppercase tracking-wider text-[11px]">
-                  Associated Skills (Comma separated)
-                </label>
-                <input
-                  type="text"
-                  placeholder="e.g. Java, Spring Boot, Docker, PostgreSQL"
-                  value={newCommunitySkills}
-                  onChange={(e) => setNewCommunitySkills(e.target.value)}
-                  className="w-full rounded-2xl bg-slate-800 border border-slate-700 px-4 py-2.5 text-xs text-white placeholder-slate-500 focus:outline-hidden focus:border-blue-500"
-                />
-              </div>
-
-              <div className="pt-3 border-t border-slate-800 flex justify-end space-x-2">
-                <button
-                  type="button"
-                  onClick={() => setShowCreateModal(false)}
-                  className="px-4 py-2.5 rounded-xl bg-slate-800 text-slate-300 hover:text-white font-bold"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-black shadow-lg"
-                >
-                  Create Community (You will be Owner)
-                </button>
-              </div>
-            </form>
+            )}
           </div>
         </div>
-      )}
+
+        {/* Center Search Pill */}
+        <div className="relative w-full max-w-md mx-6">
+          <Search className="w-3.5 h-3.5 absolute left-3.5 top-1/2 -translate-y-1/2 text-purple-300/60" />
+          <input
+            type="text"
+            placeholder="Search Education, Tech, Industry, Jobs..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full rounded-full bg-[#1e1136]/90 border border-white/10 pl-9 pr-4 py-1.5 text-xs text-white placeholder-purple-300/50 focus:outline-hidden focus:border-purple-500/80 focus:ring-1 focus:ring-purple-500/50 transition-all shadow-inner"
+          />
+        </div>
+
+        {/* Right Utility Icons */}
+        <div className="flex items-center space-x-3.5 text-purple-200/70">
+          <button
+            title="Bookmarked Threads"
+            className="hover:text-white transition-colors cursor-pointer"
+          >
+            <Bookmark className="w-4 h-4" />
+          </button>
+          <button
+            title="Notifications"
+            className="relative hover:text-white transition-colors cursor-pointer"
+          >
+            <Bell className="w-4 h-4" />
+            <span className="absolute -top-1 -right-1 w-2 h-2 rounded-full bg-fuchsia-500 animate-pulse" />
+          </button>
+          <button
+            title="Direct Messages"
+            className="hover:text-white transition-colors cursor-pointer"
+          >
+            <User className="w-4 h-4" />
+          </button>
+          <button
+            title="Settings"
+            className="hover:text-white transition-colors cursor-pointer"
+          >
+            <Settings className="w-4 h-4" />
+          </button>
+        </div>
+      </header>
 
       {/* =====================================================================
-          2. MAIN DISCORD WORKSPACE CONTAINER
+          MAIN 4-COLUMN WORKSPACE BODY
          ===================================================================== */}
       <div className="flex-1 flex overflow-hidden">
         {/* ===================================================================
-            COLUMN 1: SERVERS RAIL (LEFTMOST BAR)
+            COLUMN 1: SERVERS RAIL (LEFTMOST)
            =================================================================== */}
-        <aside className="w-[72px] bg-slate-950/80 border-r border-slate-800/80 flex flex-col items-center py-3.5 space-y-2.5 shrink-0 z-20">
-          {/* Discover / Home Icon */}
-          <button
-            onClick={() => setCurrentView("discover")}
-            className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all group relative cursor-pointer ${
-              currentView === "discover"
-                ? "bg-blue-600 text-white rounded-2xl shadow-lg shadow-blue-600/30"
-                : "bg-slate-850 hover:bg-blue-600 hover:text-white text-slate-300 rounded-3xl hover:rounded-2xl"
-            }`}
-            title="Discover Communities"
-          >
-            {/* Active Pill Indicator */}
-            <span
-              className={`absolute -left-1 w-1 bg-white rounded-r-full transition-all ${
-                currentView === "discover" ? "h-8" : "h-0 group-hover:h-4"
+        <aside className="w-[74px] bg-[#120722]/95 border-r border-white/10 flex flex-col items-center py-3.5 justify-between shrink-0 z-20 shadow-2xl">
+          {/* Top: Discord/Compass Logo & Server List */}
+          <div className="w-full flex flex-col items-center space-y-3 overflow-y-auto no-scrollbar">
+            {/* Discord Explore Master Button */}
+            <button
+              onClick={() => setCurrentView("explore")}
+              title="Explore Communities"
+              className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all group relative cursor-pointer ${
+                currentView === "explore"
+                  ? "bg-gradient-to-tr from-purple-600 to-fuchsia-600 text-white shadow-lg shadow-purple-600/40 rounded-2xl scale-105"
+                  : "bg-[#1f113a] text-purple-300 hover:bg-purple-600 hover:text-white rounded-3xl hover:rounded-2xl"
               }`}
-            />
-            <Compass className="w-6 h-6" />
-          </button>
+            >
+              {/* Active Indicator Pill */}
+              <span
+                className={`absolute -left-1 w-1 bg-white rounded-r-full transition-all ${
+                  currentView === "explore" ? "h-9" : "h-0 group-hover:h-4"
+                }`}
+              />
+              <Compass className="w-6 h-6" />
+            </button>
 
-          <div className="w-8 h-0.5 bg-slate-800 rounded-full" />
+            <div className="w-8 h-[1px] bg-white/10 rounded-full" />
 
-          {/* Joined Server Icons */}
-          <div className="flex-1 w-full space-y-2.5 overflow-y-auto no-scrollbar flex flex-col items-center">
-            {servers
-              .filter((s) => s.isJoined)
-              .map((server) => {
-                const isActive = currentView === "server" && activeServerId === server.id;
-                return (
-                  <button
-                    key={server.id}
-                    onClick={() => {
-                      setActiveServerId(server.id);
-                      setActiveChannelId(server.channelCategories[0]?.channels[0]?.id || "general");
-                      setCurrentView("server");
-                    }}
-                    className={`w-12 h-12 flex items-center justify-center font-black text-sm transition-all group relative cursor-pointer ${
-                      isActive
-                        ? "bg-gradient-to-tr from-blue-600 to-indigo-600 text-white rounded-2xl shadow-lg shadow-blue-500/25 scale-105"
-                        : "bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-3xl hover:rounded-2xl"
+            {/* Server Icons List */}
+            {communities.map((comm) => {
+              const isActive = currentView === "server" && activeServer?.id === comm.id;
+              return (
+                <button
+                  key={comm.id}
+                  onClick={() => handleOpenServer(comm)}
+                  title={comm.name}
+                  className={`w-12 h-12 flex items-center justify-center font-black text-xs transition-all group relative cursor-pointer ${
+                    isActive
+                      ? "bg-gradient-to-tr from-fuchsia-600 to-purple-600 text-white rounded-2xl shadow-lg shadow-fuchsia-600/40 scale-105"
+                      : "bg-[#1f103b] hover:bg-[#2b1750] text-purple-200 rounded-3xl hover:rounded-2xl border border-white/5"
+                  }`}
+                >
+                  {/* Indicator */}
+                  <span
+                    className={`absolute -left-1 w-1 bg-white rounded-r-full transition-all ${
+                      isActive ? "h-9" : "h-0 group-hover:h-3.5"
                     }`}
-                    title={server.name}
-                  >
-                    {/* Active Pill Indicator */}
-                    <span
-                      className={`absolute -left-1 w-1 bg-white rounded-r-full transition-all ${
-                        isActive ? "h-10" : "h-0 group-hover:h-5"
-                      }`}
-                    />
-                    <span>{server.initials}</span>
+                  />
+                  {comm.icon ? (
+                    <span className="tracking-tighter font-extrabold">{comm.icon}</span>
+                  ) : (
+                    <span>{comm.name.slice(0, 2).toUpperCase()}</span>
+                  )}
+                </button>
+              );
+            })}
 
-                    {/* Unread Badge Mock */}
-                    {server.id === "server-webdev" && (
-                      <span className="absolute -top-1 -right-1 w-4 h-4 bg-rose-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center border-2 border-slate-950">
-                        3
-                      </span>
-                    )}
-                  </button>
-                );
-              })}
-
-            {/* + Create Community Button */}
+            {/* Add New Community (+) Button */}
             <button
               onClick={() => setShowCreateModal(true)}
-              className="w-12 h-12 rounded-3xl hover:rounded-2xl bg-slate-800 hover:bg-emerald-600 text-emerald-400 hover:text-white flex items-center justify-center transition-all cursor-pointer group"
-              title="Create a Community"
+              title="Create a Community Guild"
+              className="w-12 h-12 rounded-3xl hover:rounded-2xl bg-[#1f103b] hover:bg-emerald-600 text-emerald-400 hover:text-white flex items-center justify-center transition-all cursor-pointer border border-emerald-500/20 group"
             >
-              <Plus className="w-6 h-6 group-hover:rotate-90 transition-transform" />
+              <Plus className="w-5 h-5 transition-transform group-hover:rotate-90" />
             </button>
+          </div>
+
+          {/* Bottom: Animated Voice Equalizer & User Controls */}
+          <div className="w-full flex flex-col items-center space-y-3 pt-3 border-t border-white/10">
+            {/* Animated Soundwave Frequency Bars */}
+            <div
+              title={connectedVoice ? `Connected to ${connectedVoice}` : "Voice Ready"}
+              className="flex items-center justify-center space-x-[2.5px] h-6 px-2 py-1 rounded-full bg-[#1b0d33] border border-white/5"
+            >
+              <span className="w-1 bg-fuchsia-400 rounded-full animate-bounce [animation-delay:-0.3s] h-3" />
+              <span className="w-1 bg-purple-400 rounded-full animate-bounce [animation-delay:-0.1s] h-4" />
+              <span className="w-1 bg-cyan-400 rounded-full animate-bounce [animation-delay:-0.4s] h-2.5" />
+              <span className="w-1 bg-pink-400 rounded-full animate-bounce [animation-delay:-0.2s] h-5" />
+              <span className="w-1 bg-indigo-400 rounded-full animate-bounce [animation-delay:-0.35s] h-3.5" />
+            </div>
+
+            {/* User Mini Avatar & Controls */}
+            <div className="w-full flex flex-col items-center space-y-1.5 px-2">
+              <div
+                title="Viktor Bateman (@viktorbateman)"
+                className="relative w-9 h-9 rounded-full overflow-hidden border-2 border-fuchsia-500/80 shadow-md cursor-pointer hover:scale-105 transition-transform"
+              >
+                <Image
+                  src="/communities/viktor.jpg"
+                  alt="Viktor Bateman"
+                  fill
+                  className="object-cover"
+                />
+              </div>
+
+              {/* Quick Audio Toggles */}
+              <div className="flex items-center space-x-1 text-purple-300">
+                <button
+                  onClick={() => setIsMuted(!isMuted)}
+                  title={isMuted ? "Unmute Mic" : "Mute Mic"}
+                  className={`p-1 rounded hover:bg-white/10 cursor-pointer ${
+                    isMuted ? "text-red-400" : "hover:text-white"
+                  }`}
+                >
+                  {isMuted ? <MicOff className="w-3.5 h-3.5" /> : <Mic className="w-3.5 h-3.5" />}
+                </button>
+                <button
+                  onClick={() => setIsDeafened(!isDeafened)}
+                  title={isDeafened ? "Undeafen" : "Deafen"}
+                  className={`p-1 rounded hover:bg-white/10 cursor-pointer ${
+                    isDeafened ? "text-red-400" : "hover:text-white"
+                  }`}
+                >
+                  <Headphones className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </div>
           </div>
         </aside>
 
         {/* ===================================================================
-            VIEW A: DISCOVER COMMUNITIES VIEW
+            EXPLORE VIEW: 3 COLUMNS (Nav + Feed + Profile/Activity)
            =================================================================== */}
-        {currentView === "discover" ? (
-          <div className="flex-1 bg-slate-900 overflow-y-auto p-6 sm:p-8 space-y-6">
-            {/* Discover Header */}
-            <div className="relative rounded-3xl bg-gradient-to-r from-blue-900 via-indigo-950 to-slate-900 p-8 border border-slate-700/60 shadow-xl overflow-hidden">
-              <div className="max-w-2xl relative z-10 space-y-3">
-                <span className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-blue-500/20 text-blue-300 text-xs font-bold border border-blue-400/30">
-                  <Compass className="w-3.5 h-3.5" />
-                  <span>Discover Campus &amp; Industry Guilds</span>
-                </span>
-                <h2 className="text-3xl font-black text-white tracking-tight">
-                  Find Your Technical Community
+        {currentView === "explore" ? (
+          <div className="flex-1 flex overflow-hidden">
+            {/* ===============================================================
+                COLUMN 2: EXPLORE NAVIGATION SIDEBAR (EDUCATION, TECH, INDUSTRY, NEWS, STUDENTS, JOBS)
+               =============================================================== */}
+            <aside className="w-56 bg-[#160b29]/80 backdrop-blur-md border-r border-white/10 flex flex-col p-4 shrink-0">
+              <div className="mb-4">
+                <h2 className="text-xs font-bold uppercase tracking-wider text-purple-300/70 mb-3 px-2">
+                  Discover Categories
                 </h2>
-                <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
-                  Join student-led study circles, industry-partnered research guilds, and placement sprint squads.
-                </p>
+                <nav className="space-y-1">
+                  {[
+                    { name: "Home", icon: Compass },
+                    { name: "Education", icon: GraduationCap },
+                    { name: "Tech", icon: Cpu },
+                    { name: "Industry", icon: Briefcase },
+                    { name: "Jobs", icon: TrendingUp },
+                    { name: "News", icon: Radio },
+                    { name: "Students", icon: Users },
+                  ].map((cat) => {
+                    const Icon = cat.icon;
+                    const isActive = activeCategory === cat.name;
+                    return (
+                      <button
+                        key={cat.name}
+                        onClick={() => setActiveCategory(cat.name)}
+                        className={`w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
+                          isActive
+                            ? "bg-gradient-to-r from-purple-600/90 to-fuchsia-600/90 text-white shadow-md shadow-purple-900/40 font-bold"
+                            : "text-purple-200/70 hover:text-white hover:bg-white/5"
+                        }`}
+                      >
+                        <Icon className={`w-4 h-4 ${isActive ? "text-white" : "text-purple-400"}`} />
+                        <span>{cat.name}</span>
+                      </button>
+                    );
+                  })}
+                </nav>
+              </div>
 
-                {/* Search Bar */}
-                <div className="pt-2 relative max-w-lg">
-                  <Search className="w-4 h-4 absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
-                  <input
-                    type="text"
-                    placeholder="Explore Web Dev, AI, Cloud, Placement Prep..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full rounded-2xl bg-slate-800/90 border border-slate-700 pl-11 pr-4 py-3 text-xs text-white placeholder-slate-400 focus:outline-hidden focus:border-blue-500 shadow-md"
-                  />
+              {/* Quick Info Box in Sidebar */}
+              <div className="mt-auto p-3.5 rounded-2xl bg-[#1d0e37]/70 border border-white/10 text-xs">
+                <div className="flex items-center space-x-2 text-fuchsia-400 font-bold mb-1">
+                  <Sparkles className="w-3.5 h-3.5" />
+                  <span>Academia-Industry</span>
+                </div>
+                <p className="text-[11px] text-purple-200/60 leading-relaxed">
+                  Join verified campus engineering hubs, tier-1 placement networks, and industry research circles.
+                </p>
+              </div>
+            </aside>
+
+            {/* ===============================================================
+                COLUMN 3: MAIN EXPLORE FEED (Center Banner + Grids)
+               =============================================================== */}
+            <main className="flex-1 overflow-y-auto p-6 space-y-7 custom-scrollbar">
+              {/* Cosmic Nebula Hero Banner */}
+              <div className="relative rounded-3xl overflow-hidden border border-white/15 shadow-2xl h-52 flex items-center justify-center p-8 group">
+                <Image
+                  src="/communities/hero.jpg"
+                  alt="Cosmic Community Nebula"
+                  fill
+                  priority
+                  className="object-cover transition-transform duration-700 group-hover:scale-105"
+                />
+                <div className="absolute inset-0 bg-gradient-to-r from-purple-950/80 via-black/40 to-fuchsia-950/80 backdrop-blur-[2px]" />
+                <div className="relative z-10 text-center max-w-xl space-y-2">
+                  <div className="inline-flex items-center space-x-1.5 px-3 py-0.5 rounded-full bg-white/10 border border-white/20 text-[11px] font-semibold text-purple-200 mb-1 backdrop-blur-md">
+                    <Sparkles className="w-3 h-3 text-fuchsia-400" />
+                    <span>Verified Academic & Industry Guilds</span>
+                  </div>
+                  <h2 className="text-3xl font-black tracking-tight text-white drop-shadow-md">
+                    Find Your Community <span className="text-purple-300">on CampusBridge</span>
+                  </h2>
+                  <p className="text-xs text-purple-200/80 leading-relaxed max-w-md mx-auto">
+                    Collaborate on AI research, hackathons, and placement drives directly with faculty mentors and industry partners.
+                  </p>
                 </div>
               </div>
-            </div>
 
-            {/* Category Filter Chips */}
-            <div className="flex flex-wrap gap-2 pt-2">
-              {["All", "Engineering", "Data & AI", "Cloud", "Career", "Design"].map((cat) => (
-                <button
-                  key={cat}
-                  onClick={() => setDiscoverCategory(cat)}
-                  className={`px-4 py-1.5 rounded-full text-xs font-bold transition-all cursor-pointer ${
-                    discoverCategory === cat
-                      ? "bg-blue-600 text-white shadow-md"
-                      : "bg-slate-800 hover:bg-slate-750 text-slate-300"
-                  }`}
-                >
-                  {cat}
-                </button>
-              ))}
-            </div>
-
-            {/* Communities Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-              {servers
-                .filter((s) => discoverCategory === "All" || s.category === discoverCategory)
-                .filter(
-                  (s) =>
-                    s.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                    s.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                    s.taggedSkills.some((sk) => sk.toLowerCase().includes(searchQuery.toLowerCase()))
-                )
-                .map((server) => (
-                  <div
-                    key={server.id}
-                    className="bg-slate-850 border border-slate-750 rounded-3xl p-5 hover:border-slate-650 transition-all flex flex-col justify-between group shadow-md"
+              {/* =============================================================
+                  FEATURED COMMUNITY (AI & ML, Cloud & Web)
+                 ============================================================= */}
+              <section className="space-y-3.5">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-base font-extrabold text-white tracking-wide flex items-center space-x-2">
+                    <span>Featured Community</span>
+                    <span className="w-2 h-2 rounded-full bg-fuchsia-500 animate-ping" />
+                  </h3>
+                  <button
+                    onClick={() => setActiveCategory("Tech")}
+                    className="text-xs text-purple-400 hover:text-purple-300 font-semibold cursor-pointer"
                   >
-                    <div>
-                      <div className="flex items-start justify-between mb-3">
-                        <div
-                          className={`w-12 h-12 rounded-2xl bg-gradient-to-tr ${server.color} text-white font-black flex items-center justify-center text-lg shadow-md`}
-                        >
-                          {server.initials}
-                        </div>
-                        <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700">
-                          {server.badge}
-                        </span>
-                      </div>
-
-                      <h3 className="font-extrabold text-base text-white group-hover:text-blue-400 transition-colors">
-                        {server.name}
-                      </h3>
-                      <p className="text-xs text-slate-400 mt-1 leading-relaxed line-clamp-2">
-                        {server.description}
-                      </p>
-
-                      <div className="mt-3.5 flex flex-wrap gap-1">
-                        {server.taggedSkills.map((sk) => (
-                          <span
-                            key={sk}
-                            className="text-[10px] font-semibold px-2 py-0.5 rounded bg-slate-800 text-slate-300 border border-slate-700"
-                          >
-                            {sk}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div className="mt-5 pt-3.5 border-t border-slate-800 flex items-center justify-between text-xs">
-                      <div className="flex items-center space-x-3 text-slate-400 text-[11px]">
-                        <span>{server.membersCount.toLocaleString()} members</span>
-                        <span>•</span>
-                        <span className="text-emerald-400 font-bold">{server.onlineCount} online</span>
-                      </div>
-
-                      {server.isJoined ? (
-                        <button
-                          onClick={() => {
-                            setActiveServerId(server.id);
-                            setCurrentView("server");
-                          }}
-                          className="px-3.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold transition-colors cursor-pointer"
-                        >
-                          Open Guild
-                        </button>
-                      ) : (
-                        <button
-                          onClick={() => handleToggleJoinServer(server.id)}
-                          className="px-3.5 py-1.5 rounded-xl bg-slate-800 hover:bg-emerald-600 hover:text-white text-emerald-400 font-bold border border-slate-700 transition-all cursor-pointer"
-                        >
-                          Join Guild
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                ))}
-            </div>
-          </div>
-        ) : (
-          /* ===================================================================
-              VIEW B: ACTIVE DISCORD SERVER WORKSPACE
-             =================================================================== */
-          <>
-            {/* =================================================================
-                COLUMN 2: CHANNELS SIDEBAR
-               ================================================================= */}
-            <div className="w-60 bg-slate-900 border-r border-slate-800 flex flex-col justify-between shrink-0">
-              {/* Server Title & Dropdown Header */}
-              <div>
-                <div className="p-4 border-b border-slate-800 flex items-center justify-between shadow-xs">
-                  <div className="flex items-center space-x-2 min-w-0">
-                    <h2 className="font-extrabold text-sm text-white truncate" title={activeServer.name}>
-                      {activeServer.name}
-                    </h2>
-                    <ShieldCheck className="w-4 h-4 text-blue-400 shrink-0" />
-                  </div>
-                  <ChevronDown className="w-4 h-4 text-slate-400 hover:text-white cursor-pointer" />
+                    See all
+                  </button>
                 </div>
 
-                {/* Channels List */}
-                <div className="p-3 space-y-4 overflow-y-auto max-h-[calc(100vh-270px)]">
-                  {activeServer.channelCategories.map((cat, idx) => (
-                    <div key={idx} className="space-y-1">
-                      <div className="flex items-center justify-between text-[11px] font-bold text-slate-400 px-2 py-1 tracking-wider uppercase">
-                        <span>{cat.name}</span>
-                        <Plus className="w-3.5 h-3.5 hover:text-white cursor-pointer" />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                  {featured.map((comm) => (
+                    <div
+                      key={comm.id}
+                      className="group relative rounded-3xl overflow-hidden bg-[#1c0e38]/70 border border-white/10 hover:border-fuchsia-500/50 transition-all duration-300 shadow-xl flex flex-col justify-between"
+                    >
+                      {/* Card Banner */}
+                      <div className="relative h-36 w-full overflow-hidden">
+                        <Image
+                          src={comm.banner}
+                          alt={comm.name}
+                          fill
+                          className="object-cover transition-transform duration-500 group-hover:scale-105"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-[#1c0e38] via-transparent to-black/30" />
+                        <div className="absolute -bottom-4 left-6 w-12 h-12 rounded-2xl bg-gradient-to-tr from-fuchsia-600 to-purple-600 border-2 border-[#1c0e38] flex items-center justify-center font-black text-sm text-white shadow-xl">
+                          {comm.icon}
+                        </div>
                       </div>
 
-                      <div className="space-y-0.5">
-                        {cat.channels.map((channel) => {
-                          const isChannelActive = activeChannelId === channel.id;
-                          const isVoice = channel.type === "voice";
-                          const isConnectedVoice = connectedVoiceChannel === channel.name;
+                      {/* Card Body */}
+                      <div className="p-5 pt-6 flex-1 flex flex-col justify-between space-y-3">
+                        <div>
+                          <div className="flex items-center justify-between">
+                            <h4 className="text-lg font-black text-white group-hover:text-fuchsia-300 transition-colors">
+                              {comm.name}
+                            </h4>
+                            <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-purple-900/60 border border-purple-700/50 text-purple-300">
+                              {comm.category}
+                            </span>
+                          </div>
+                          <p className="text-xs text-purple-200/70 mt-1 line-clamp-2 leading-relaxed">
+                            {comm.description}
+                          </p>
+                        </div>
 
-                          return (
-                            <button
-                              key={channel.id}
-                              onClick={() => {
-                                if (isVoice) {
-                                  handleVoiceChannelClick(channel);
-                                } else {
-                                  setActiveChannelId(channel.id);
-                                }
-                              }}
-                              className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
-                                isChannelActive
-                                  ? "bg-slate-800 text-white font-bold"
-                                  : isConnectedVoice
-                                  ? "bg-emerald-950/60 text-emerald-300 font-bold border border-emerald-800/60"
-                                  : "text-slate-400 hover:text-slate-200 hover:bg-slate-850"
-                              }`}
-                            >
-                              <div className="flex items-center space-x-2 min-w-0">
-                                {isVoice ? (
-                                  <Volume2
-                                    className={`w-4 h-4 shrink-0 ${
-                                      isConnectedVoice ? "text-emerald-400 animate-pulse" : "text-slate-400"
-                                    }`}
-                                  />
-                                ) : (
-                                  <Hash className="w-4 h-4 shrink-0 text-slate-500" />
-                                )}
-                                <span className="truncate">{channel.name}</span>
-                              </div>
+                        {/* Footer Stats & Open Button */}
+                        <div className="pt-3 border-t border-white/10 flex items-center justify-between">
+                          <div className="flex items-center space-x-2 text-[11px] text-purple-300/80">
+                            <span className="inline-block w-2 h-2 rounded-full bg-emerald-400" />
+                            <span>{comm.onlineCount.toLocaleString()} Online</span>
+                            <span>•</span>
+                            <span>{comm.memberCount.toLocaleString()} Members</span>
+                          </div>
 
-                              {/* Unread Count or Voice Ping */}
-                              {channel.unreadCount ? (
-                                <span className="bg-blue-600 text-white text-[10px] font-bold px-1.5 py-0.2 rounded-full">
-                                  {channel.unreadCount}
-                                </span>
-                              ) : isConnectedVoice ? (
-                                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-                              ) : null}
-                            </button>
-                          );
-                        })}
+                          <button
+                            onClick={() => handleOpenServer(comm)}
+                            className="px-4 py-1.5 rounded-xl bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-500 hover:to-fuchsia-500 text-white font-bold text-xs shadow-md shadow-purple-900/40 transition-all cursor-pointer"
+                          >
+                            Open Community
+                          </button>
+                        </div>
                       </div>
+                    </div>
+                  ))}
+                </div>
+              </section>
+
+              {/* =============================================================
+                  POPULAR RIGHT NOW (Jobs & Careers, Education & SIH)
+                 ============================================================= */}
+              <section className="space-y-3.5">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-base font-extrabold text-white tracking-wide">
+                    Popular Right now
+                  </h3>
+                  <button
+                    onClick={() => setActiveCategory("Jobs")}
+                    className="text-xs text-purple-400 hover:text-purple-300 font-semibold cursor-pointer"
+                  >
+                    See all
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                  {popular.map((comm) => (
+                    <div
+                      key={comm.id}
+                      className="group relative rounded-3xl overflow-hidden bg-[#1c0e38]/70 border border-white/10 hover:border-purple-500/50 transition-all duration-300 shadow-xl flex flex-col justify-between"
+                    >
+                      {/* Card Banner */}
+                      <div className="relative h-32 w-full overflow-hidden">
+                        <Image
+                          src={comm.banner}
+                          alt={comm.name}
+                          fill
+                          className="object-cover transition-transform duration-500 group-hover:scale-105"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-[#1c0e38] via-transparent to-black/30" />
+                        <div className="absolute -bottom-4 left-6 w-11 h-11 rounded-2xl bg-gradient-to-tr from-purple-600 to-indigo-600 border-2 border-[#1c0e38] flex items-center justify-center font-black text-xs text-white shadow-xl">
+                          {comm.icon}
+                        </div>
+                      </div>
+
+                      {/* Card Body */}
+                      <div className="p-5 pt-6 flex-1 flex flex-col justify-between space-y-3">
+                        <div>
+                          <div className="flex items-center justify-between">
+                            <h4 className="text-lg font-black text-white group-hover:text-purple-300 transition-colors">
+                              {comm.name}
+                            </h4>
+                            <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-purple-900/60 border border-purple-700/50 text-purple-300">
+                              {comm.category}
+                            </span>
+                          </div>
+                          <p className="text-xs text-purple-200/70 mt-1 line-clamp-2 leading-relaxed">
+                            {comm.description}
+                          </p>
+                        </div>
+
+                        {/* Footer Stats & Open Button */}
+                        <div className="pt-3 border-t border-white/10 flex items-center justify-between">
+                          <div className="flex items-center space-x-2 text-[11px] text-purple-300/80">
+                            <span className="inline-block w-2 h-2 rounded-full bg-emerald-400" />
+                            <span>{comm.onlineCount.toLocaleString()} Online</span>
+                            <span>•</span>
+                            <span>{comm.memberCount.toLocaleString()} Members</span>
+                          </div>
+
+                          <button
+                            onClick={() => handleOpenServer(comm)}
+                            className="px-4 py-1.5 rounded-xl bg-white/10 hover:bg-purple-600 text-white font-bold text-xs border border-white/15 transition-all cursor-pointer"
+                          >
+                            Open Community
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </section>
+
+              {/* =============================================================
+                  RECENTLY ADDED (Industry Connect & Campus News)
+                 ============================================================= */}
+              <section className="space-y-3.5">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-base font-extrabold text-white tracking-wide">
+                    Recently Added
+                  </h3>
+                  <span className="text-xs text-purple-400/80">Newly launched hubs</span>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {recent.map((comm) => (
+                    <div
+                      key={comm.id}
+                      onClick={() => handleOpenServer(comm)}
+                      className="p-4 rounded-2xl bg-[#1c0e38]/50 hover:bg-[#1c0e38]/80 border border-white/10 hover:border-purple-500/40 transition-all cursor-pointer flex items-center space-x-3.5"
+                    >
+                      <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-indigo-600 to-purple-600 flex items-center justify-center text-white font-black text-xs shrink-0 shadow-md">
+                        {comm.icon}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h5 className="text-sm font-bold text-white truncate">{comm.name}</h5>
+                        <p className="text-xs text-purple-200/60 truncate">{comm.description}</p>
+                        <div className="text-[10px] text-purple-300/70 mt-1 flex items-center space-x-2">
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                          <span>{comm.onlineCount.toLocaleString()} online</span>
+                          <span className="text-purple-400">• {comm.category}</span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            </main>
+
+            {/* ===============================================================
+                COLUMN 4: PROFILE & ACTIVITY SIDEBAR (RIGHT)
+               =============================================================== */}
+            <aside className="w-64 bg-[#140a25]/90 backdrop-blur-md border-l border-white/10 p-5 flex flex-col space-y-6 overflow-y-auto shrink-0 custom-scrollbar">
+              {/* Profile Card with Concentric Glowing Aura Rings */}
+              <div className="flex flex-col items-center text-center space-y-3 pt-2">
+                <div className="relative flex items-center justify-center w-28 h-28">
+                  <div className="absolute inset-0 rounded-full border border-fuchsia-500/20 animate-ping [animation-duration:3s]" />
+                  <div className="absolute inset-2 rounded-full border border-purple-500/40 shadow-[0_0_15px_rgba(168,85,247,0.3)]" />
+                  <div className="absolute inset-4 rounded-full border border-fuchsia-400/60" />
+
+                  <div className="relative w-16 h-16 rounded-full overflow-hidden border-2 border-fuchsia-400 shadow-xl">
+                    <Image
+                      src="/communities/viktor.jpg"
+                      alt="Viktor Bateman"
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <h3 className="text-sm font-black text-white tracking-wide">
+                    Viktor Bateman
+                  </h3>
+                  <p className="text-[11px] text-fuchsia-300/80 font-medium">
+                    @viktorbateman
+                  </p>
+                  <span className="inline-block mt-1 text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-purple-900/60 text-purple-300 border border-purple-700/50">
+                    Lead Mentor • AI Research
+                  </span>
+                </div>
+              </div>
+
+              {/* Academic & Industry Moderators List */}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between text-xs font-bold uppercase tracking-wider text-purple-300/70">
+                  <span>Mentors & Leads</span>
+                  <span className="text-[10px] font-normal text-purple-400">4 active</span>
+                </div>
+
+                <div className="space-y-2">
+                  {moderators.map((mod) => (
+                    <div
+                      key={mod.id}
+                      className="flex items-center justify-between p-2 rounded-xl hover:bg-white/5 transition-colors cursor-pointer group"
+                    >
+                      <div className="flex items-center space-x-2.5">
+                        <div className="relative">
+                          <div
+                            className={`w-7 h-7 rounded-full bg-gradient-to-tr ${mod.avatarBg} text-[10px] font-bold text-white flex items-center justify-center shadow-xs`}
+                          >
+                            {mod.name.slice(0, 2).toUpperCase()}
+                          </div>
+                          <span
+                            className={`absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-[#140a25] ${
+                              mod.status === "online" ? "bg-emerald-400" : "bg-amber-400"
+                            }`}
+                          />
+                        </div>
+                        <div>
+                          <div className="text-xs font-bold text-white group-hover:text-purple-300 transition-colors">
+                            {mod.name}
+                          </div>
+                          <div className="text-[10px] text-purple-300/60">{mod.role}</div>
+                        </div>
+                      </div>
+                      <span className="text-[10px] text-purple-400/60">{mod.time}</span>
                     </div>
                   ))}
                 </div>
               </div>
 
-              {/* Bottom Sticky Footers: Voice Connection HUD + User Profile */}
-              <div className="border-t border-slate-800 bg-slate-950">
-                {/* Voice Connected Banner (Shows when joined to voice) */}
-                {connectedVoiceChannel && (
-                  <div className="p-3 bg-emerald-950/80 border-b border-emerald-900/60 flex items-center justify-between text-xs">
-                    <div className="flex items-center space-x-2">
+              {/* Recent Activity Feed (Research, Projects & Placement News) */}
+              <div className="space-y-3 pt-2 border-t border-white/10">
+                <div className="text-xs font-bold uppercase tracking-wider text-purple-300/70">
+                  Campus & Industry Feed
+                </div>
+
+                <div className="space-y-2.5">
+                  {recentActivity.map((act) => (
+                    <div
+                      key={act.id}
+                      className="p-2.5 rounded-xl bg-[#1b0d33]/60 border border-white/5 space-y-1 hover:border-purple-500/30 transition-all text-xs"
+                    >
+                      <div className="flex items-center justify-between">
+                        <span className="font-bold text-white text-[11px]">{act.user}</span>
+                        <span className="text-[10px] text-purple-400/60">{act.time}</span>
+                      </div>
+                      <p className="text-[11px] text-fuchsia-300/90 leading-tight">
+                        {act.action}
+                      </p>
+                      <p className="text-[10px] text-purple-200/50 truncate">{act.detail}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </aside>
+          </div>
+        ) : (
+          /* ===================================================================
+              SERVER WORKSPACE VIEW: CHANNELS SIDEBAR + INTERACTIVE CHAT STREAM
+             =================================================================== */
+          activeServer && (
+            <div className="flex-1 flex overflow-hidden">
+              {/* ===============================================================
+                  CHANNELS SIDEBAR
+                 =============================================================== */}
+              <aside className="w-60 bg-[#160b2b]/90 border-r border-white/10 flex flex-col justify-between shrink-0">
+                <div>
+                  {/* Guild Header Dropdown */}
+                  <div className="p-4 border-b border-white/10 flex items-center justify-between shadow-xs">
+                    <div className="flex items-center space-x-2 min-w-0">
+                      <div className="w-6 h-6 rounded-lg bg-gradient-to-tr from-fuchsia-600 to-purple-600 flex items-center justify-center text-xs font-black text-white shrink-0">
+                        {activeServer.icon}
+                      </div>
+                      <h2 className="font-extrabold text-sm text-white truncate">
+                        {activeServer.name}
+                      </h2>
+                    </div>
+                    <ChevronDown className="w-4 h-4 text-purple-300 cursor-pointer" />
+                  </div>
+
+                  {/* Channels List */}
+                  <div className="p-3 space-y-4 overflow-y-auto max-h-[calc(100vh-230px)] custom-scrollbar">
+                    {/* Text Channels */}
+                    <div className="space-y-1">
+                      <div className="flex items-center justify-between text-[11px] font-bold text-purple-300/60 px-2 py-1 tracking-wider uppercase">
+                        <span>Text Channels</span>
+                        <Plus className="w-3.5 h-3.5 hover:text-white cursor-pointer" />
+                      </div>
+                      {activeServer.channels
+                        .filter((ch) => ch.type !== "voice")
+                        .map((channel) => {
+                          const isChannelActive = activeChannelId === channel.id;
+                          return (
+                            <button
+                              key={channel.id}
+                              onClick={() => setActiveChannelId(channel.id)}
+                              className={`w-full flex items-center space-x-2 px-2.5 py-1.5 rounded-xl text-xs font-medium transition-colors cursor-pointer ${
+                                isChannelActive
+                                  ? "bg-purple-600/80 text-white font-bold"
+                                  : "text-purple-200/70 hover:bg-white/5 hover:text-white"
+                              }`}
+                            >
+                              <Hash className="w-3.5 h-3.5 text-purple-400 shrink-0" />
+                              <span className="truncate">{channel.name}</span>
+                            </button>
+                          );
+                        })}
+                    </div>
+
+                    {/* Voice Channels */}
+                    <div className="space-y-1">
+                      <div className="flex items-center justify-between text-[11px] font-bold text-purple-300/60 px-2 py-1 tracking-wider uppercase">
+                        <span>Voice Channels</span>
+                        <Volume2 className="w-3.5 h-3.5 hover:text-white cursor-pointer" />
+                      </div>
+                      {activeServer.channels
+                        .filter((ch) => ch.type === "voice")
+                        .map((channel) => {
+                          const isConnected = connectedVoice === channel.name;
+                          return (
+                            <button
+                              key={channel.id}
+                              onClick={() =>
+                                setConnectedVoice(isConnected ? null : channel.name)
+                              }
+                              className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-xl text-xs font-medium transition-colors cursor-pointer ${
+                                isConnected
+                                  ? "bg-emerald-600/80 text-white font-bold"
+                                  : "text-purple-200/70 hover:bg-white/5 hover:text-white"
+                              }`}
+                            >
+                              <div className="flex items-center space-x-2 truncate">
+                                <Volume2 className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                                <span className="truncate">{channel.name}</span>
+                              </div>
+                              {isConnected && (
+                                <span className="text-[10px] px-1.5 py-0.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-700">
+                                  Live
+                                </span>
+                              )}
+                            </button>
+                          );
+                        })}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Return to Explore Pill */}
+                <div className="p-3 border-t border-white/10">
+                  <button
+                    onClick={() => setCurrentView("explore")}
+                    className="w-full py-2 px-3 rounded-xl bg-white/10 hover:bg-white/15 text-xs text-purple-200 font-bold flex items-center justify-center space-x-2 transition-colors cursor-pointer"
+                  >
+                    <ArrowLeft className="w-3.5 h-3.5" />
+                    <span>Explore Dashboard</span>
+                  </button>
+                </div>
+              </aside>
+
+              {/* ===============================================================
+                  INTERACTIVE CHAT STREAM (Main Feed)
+                 =============================================================== */}
+              <div className="flex-1 flex flex-col bg-[#110620]/95 overflow-hidden">
+                {/* Channel Header Bar */}
+                <div className="h-12 border-b border-white/10 px-5 flex items-center justify-between bg-[#150a27]/60 backdrop-blur-xs shrink-0">
+                  <div className="flex items-center space-x-2.5">
+                    <Hash className="w-4 h-4 text-purple-400" />
+                    <span className="font-extrabold text-sm text-white">
+                      {activeServer.channels.find((c) => c.id === activeChannelId)?.name ||
+                        activeChannelId}
+                    </span>
+                    <span className="text-white/20 text-xs">|</span>
+                    <span className="text-xs text-purple-300/60 hidden sm:inline truncate max-w-md">
+                      {activeServer.description}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center space-x-2 text-xs text-purple-300/80">
+                    <span className="w-2 h-2 rounded-full bg-emerald-400 inline-block" />
+                    <span>{activeServer.onlineCount.toLocaleString()} online</span>
+                  </div>
+                </div>
+
+                {/* Live Voice Room Bar if connected */}
+                {connectedVoice && (
+                  <div className="bg-emerald-950/40 border-b border-emerald-500/30 px-5 py-2.5 flex items-center justify-between animate-in fade-in duration-200">
+                    <div className="flex items-center space-x-3">
                       <Radio className="w-4 h-4 text-emerald-400 animate-pulse" />
                       <div>
-                        <p className="font-bold text-emerald-300 text-[11px]">Voice Connected</p>
-                        <p className="text-[10px] text-emerald-400/80 truncate max-w-[110px]">{connectedVoiceChannel}</p>
+                        <div className="text-xs font-bold text-white flex items-center space-x-2">
+                          <span>Connected to {connectedVoice}</span>
+                          <span className="text-[10px] text-emerald-300 bg-emerald-900/60 px-1.5 rounded">
+                            Ultra Low Latency Audio Lab
+                          </span>
+                        </div>
                       </div>
                     </div>
-                    <div className="flex items-center space-x-1">
-                      <button
-                        onClick={() => setIsScreenSharing(!isScreenSharing)}
-                        className={`p-1.5 rounded-lg ${isScreenSharing ? "bg-emerald-600 text-white" : "text-emerald-400 hover:bg-emerald-900"}`}
-                        title="Screen Share"
-                      >
-                        <Monitor className="w-3.5 h-3.5" />
-                      </button>
-                      <button
-                        onClick={() => setConnectedVoiceChannel(null)}
-                        className="p-1.5 rounded-lg bg-rose-600 hover:bg-rose-700 text-white cursor-pointer"
-                        title="Disconnect Voice"
-                      >
-                        <PhoneOff className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
+                    <button
+                      onClick={() => setConnectedVoice(null)}
+                      className="px-3 py-1 rounded-lg bg-red-600 hover:bg-red-700 text-white font-bold text-xs flex items-center space-x-1.5 transition-colors cursor-pointer"
+                    >
+                      <PhoneOff className="w-3 h-3" />
+                      <span>Disconnect</span>
+                    </button>
                   </div>
                 )}
 
-                {/* User Status Bar */}
-                <div className="p-2.5 flex items-center justify-between">
-                  <div className="flex items-center space-x-2 min-w-0">
-                    <div className="relative shrink-0">
-                      <div className="w-8 h-8 rounded-full bg-indigo-600 text-white text-xs font-bold flex items-center justify-center">
-                        AS
-                      </div>
-                      <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-500 border-2 border-slate-950" />
+                {/* Messages Stream */}
+                <div className="flex-1 overflow-y-auto p-5 space-y-4 custom-scrollbar">
+                  {/* Channel Welcome Banner */}
+                  <div className="p-5 rounded-3xl bg-[#1b0d35]/60 border border-white/10 mb-4 space-y-1">
+                    <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-purple-600 to-fuchsia-600 flex items-center justify-center text-white mb-2">
+                      <Hash className="w-5 h-5" />
                     </div>
-                    <div className="min-w-0">
-                      <p className="text-xs font-bold text-white truncate">Ananya Sharma</p>
-                      <p className="text-[10px] text-slate-400 truncate">#2026 Student</p>
-                    </div>
+                    <h3 className="text-lg font-black text-white">
+                      Welcome to #{activeServer.channels.find((c) => c.id === activeChannelId)?.name || activeChannelId}!
+                    </h3>
+                    <p className="text-xs text-purple-200/70">
+                      This is the start of the #{activeServer.channels.find((c) => c.id === activeChannelId)?.name || activeChannelId} channel in {activeServer.name}.
+                    </p>
                   </div>
 
-                  <div className="flex items-center space-x-0.5 text-slate-400">
-                    <button
-                      onClick={() => setIsMuted(!isMuted)}
-                      className={`p-1.5 rounded-lg hover:text-white hover:bg-slate-800 ${isMuted ? "text-rose-500" : ""}`}
-                      title={isMuted ? "Unmute Mic" : "Mute Mic"}
+                  {/* Messages Feed */}
+                  {(chatMessages[activeChannelId] || []).map((msg) => (
+                    <div
+                      key={msg.id}
+                      className="flex space-x-3 group hover:bg-white/[0.02] p-2.5 rounded-2xl transition-colors"
                     >
-                      {isMuted ? <MicOff className="w-3.5 h-3.5" /> : <Mic className="w-3.5 h-3.5" />}
-                    </button>
-                    <button
-                      onClick={() => setIsDeafened(!isDeafened)}
-                      className={`p-1.5 rounded-lg hover:text-white hover:bg-slate-800 ${isDeafened ? "text-rose-500" : ""}`}
-                      title={isDeafened ? "Undeafen" : "Deafen"}
-                    >
-                      <Headphones className="w-3.5 h-3.5" />
-                    </button>
-                    <button className="p-1.5 rounded-lg hover:text-white hover:bg-slate-800" title="User Settings">
-                      <Settings className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* =================================================================
-                COLUMN 3: MAIN CHAT & REAL-TIME INTERACTION STREAM
-               ================================================================= */}
-            <div className="flex-1 bg-slate-900/90 flex flex-col justify-between overflow-hidden">
-              {/* Channel Top Header */}
-              <div className="h-14 px-5 border-b border-slate-800 flex items-center justify-between shrink-0 bg-slate-900/95 backdrop-blur-xs">
-                <div className="flex items-center space-x-3 min-w-0">
-                  <Hash className="w-5 h-5 text-slate-400" />
-                  <span className="font-extrabold text-sm text-white">{activeChannel?.name || "general"}</span>
-                  <span className="text-slate-600 hidden sm:inline">|</span>
-                  <span className="text-xs text-slate-400 truncate hidden sm:inline max-w-md">
-                    {activeChannel?.topic || "Discussion & peer learning"}
-                  </span>
-                </div>
-
-                <div className="flex items-center space-x-2 text-slate-400">
-                  <button className="p-1.5 rounded-lg hover:text-white hover:bg-slate-800" title="Pinned Messages">
-                    <Pin className="w-4 h-4" />
-                  </button>
-                  <button
-                    onClick={() => setShowMembersList(!showMembersList)}
-                    className={`p-1.5 rounded-lg hover:text-white hover:bg-slate-800 ${
-                      showMembersList ? "text-blue-400 bg-slate-800" : ""
-                    }`}
-                    title="Toggle Member List"
-                  >
-                    <Users className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
-
-              {/* Chat Message Stream */}
-              <div ref={chatScrollRef} className="flex-1 overflow-y-auto p-5 space-y-5">
-                {/* Channel Welcome Banner */}
-                <div className="pt-4 pb-2 border-b border-slate-800 space-y-1">
-                  <div className="w-12 h-12 rounded-full bg-slate-800 text-blue-400 flex items-center justify-center text-xl font-bold mb-2">
-                    #
-                  </div>
-                  <h3 className="text-xl font-black text-white">Welcome to #{activeChannel?.name}!</h3>
-                  <p className="text-xs text-slate-400">
-                    This is the start of the #{activeChannel?.name} channel in {activeServer.name}.
-                  </p>
-                </div>
-
-                {/* Messages List */}
-                {channelMessages.length === 0 ? (
-                  <div className="p-12 text-center text-slate-500 text-xs italic">
-                    No messages yet in this channel. Start the conversation!
-                  </div>
-                ) : (
-                  channelMessages.map((msg) => (
-                    <div key={msg.id} className="flex items-start space-x-3.5 group hover:bg-slate-850/40 -mx-3 px-3 py-2 rounded-2xl transition-colors">
                       {/* Avatar */}
-                      <div className={`w-10 h-10 rounded-2xl ${msg.avatarBg} font-black text-xs flex items-center justify-center shrink-0 shadow-md`}>
+                      <div
+                        className={`w-9 h-9 rounded-full ${msg.avatarBg} text-xs font-black flex items-center justify-center shrink-0 shadow-md`}
+                      >
                         {msg.avatarInitials}
                       </div>
 
                       {/* Content */}
                       <div className="flex-1 min-w-0 space-y-1.5">
                         <div className="flex items-center space-x-2">
-                          <span className="font-extrabold text-sm text-white">{msg.author}</span>
-                          <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${msg.authorRoleColor}`}>
+                          <span className="font-extrabold text-xs text-white">
+                            {msg.author}
+                          </span>
+                          <span
+                            className={`text-[9px] font-bold px-1.5 py-0.5 rounded-md border ${msg.authorRoleColor}`}
+                          >
                             {msg.authorRole}
                           </span>
-                          <span className="text-[11px] text-slate-500">{msg.timestamp}</span>
+                          <span className="text-[10px] text-purple-300/50">
+                            {msg.timestamp}
+                          </span>
                         </div>
 
-                        {/* Text */}
-                        <p className="text-xs text-slate-200 leading-relaxed font-normal">
+                        <p className="text-xs text-purple-100 leading-relaxed break-words">
                           {msg.content}
                         </p>
 
-                        {/* Optional Code Block */}
+                        {/* Code Snippet if present */}
                         {msg.codeSnippet && (
-                          <div className="rounded-2xl bg-slate-950 border border-slate-800 p-3.5 font-mono text-xs overflow-x-auto text-blue-300">
-                            <div className="flex justify-between items-center text-[10px] text-slate-500 pb-2 mb-2 border-b border-slate-850 font-sans">
+                          <div className="rounded-xl overflow-hidden bg-black/60 border border-white/10 my-2 text-xs">
+                            <div className="flex items-center justify-between px-3 py-1.5 bg-white/5 border-b border-white/10 text-[10px] text-purple-300/70">
                               <span>{msg.codeSnippet.lang.toUpperCase()}</span>
                               <button
-                                onClick={() => navigator.clipboard.writeText(msg.codeSnippet!.code)}
-                                className="hover:text-white flex items-center space-x-1"
+                                onClick={() => copyCode(msg.codeSnippet!.code, msg.id)}
+                                className="flex items-center space-x-1 hover:text-white cursor-pointer"
                               >
-                                <Copy className="w-3 h-3" />
-                                <span>Copy Code</span>
+                                {copiedCodeId === msg.id ? (
+                                  <>
+                                    <Check className="w-3 h-3 text-emerald-400" />
+                                    <span className="text-emerald-400">Copied</span>
+                                  </>
+                                ) : (
+                                  <>
+                                    <Copy className="w-3 h-3" />
+                                    <span>Copy</span>
+                                  </>
+                                )}
                               </button>
                             </div>
-                            <pre className="whitespace-pre-wrap">{msg.codeSnippet.code}</pre>
+                            <pre className="p-3 text-[11px] font-mono text-purple-200 overflow-x-auto">
+                              <code>{msg.codeSnippet.code}</code>
+                            </pre>
                           </div>
                         )}
 
-                        {/* Optional Job / Internship Opportunity Embed */}
+                        {/* Job Card if present */}
                         {msg.jobCard && (
-                          <div className="p-4 rounded-2xl bg-gradient-to-r from-blue-950/60 to-indigo-950/60 border border-blue-800/60 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-lg">
+                          <div className="p-3.5 rounded-2xl bg-gradient-to-r from-purple-950/60 to-indigo-950/60 border border-purple-500/30 my-2 max-w-md space-y-2">
+                            <div className="flex items-center justify-between">
+                              <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-emerald-900/60 text-emerald-300 border border-emerald-700/50">
+                                Verified Placement Opportunity
+                              </span>
+                              <span className="text-xs font-black text-fuchsia-300">
+                                {msg.jobCard.stipend}
+                              </span>
+                            </div>
                             <div>
-                              <div className="flex items-center space-x-2 mb-1">
-                                <span className="font-bold text-xs text-blue-300">{msg.jobCard.company}</span>
-                                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-950 text-emerald-300 border border-emerald-800">
-                                  Verified
-                                </span>
-                              </div>
-                              <h4 className="font-black text-sm text-white">{msg.jobCard.title}</h4>
-                              <p className="text-xs text-slate-400 mt-0.5">
-                                {msg.jobCard.stipend} • {msg.jobCard.location}
-                              </p>
+                              <div className="text-xs font-bold text-white">{msg.jobCard.title}</div>
+                              <div className="text-[11px] text-purple-300/80">{msg.jobCard.company} • {msg.jobCard.location}</div>
                             </div>
                             <Link
                               href={msg.jobCard.applyUrl}
-                              className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow-md transition-colors flex items-center space-x-1.5 self-start sm:self-auto"
+                              className="inline-flex items-center space-x-1.5 px-3 py-1 rounded-xl bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold transition-colors"
                             >
-                              <span>Apply via Platform</span>
-                              <ArrowRight className="w-3.5 h-3.5" />
+                              <span>Apply via Portal</span>
+                              <ExternalLink className="w-3 h-3" />
                             </Link>
                           </div>
                         )}
 
                         {/* Reactions Bar */}
-                        <div className="flex flex-wrap items-center gap-1.5 pt-1">
-                          {msg.reactions.map((r, rIdx) => (
+                        <div className="flex items-center space-x-1.5 pt-1">
+                          {msg.reactions.map((r, idx) => (
                             <button
-                              key={rIdx}
+                              key={idx}
                               onClick={() => handleToggleReaction(msg.id, r.emoji)}
-                              className={`px-2.5 py-1 rounded-xl text-xs font-bold border transition-all flex items-center space-x-1 cursor-pointer ${
+                              className={`flex items-center space-x-1 px-2 py-0.5 rounded-lg text-[11px] border transition-all cursor-pointer ${
                                 r.reacted
-                                  ? "bg-blue-950/90 border-blue-500 text-blue-300"
-                                  : "bg-slate-800/80 border-slate-700/80 text-slate-400 hover:bg-slate-750"
+                                  ? "bg-purple-600/30 border-purple-500 text-white"
+                                  : "bg-white/5 border-white/10 text-purple-200/70 hover:bg-white/10"
                               }`}
                             >
                               <span>{r.emoji}</span>
-                              <span className="text-[11px]">{r.count}</span>
+                              <span className="font-bold">{r.count}</span>
                             </button>
                           ))}
-
-                          {/* Quick Emoji adders */}
-                          <div className="opacity-0 group-hover:opacity-100 transition-opacity flex items-center space-x-1 ml-2">
-                            {["👍", "❤️", "🚀", "🔥"].map((emoji) => (
-                              <button
-                                key={emoji}
-                                onClick={() => handleToggleReaction(msg.id, emoji)}
-                                className="w-6 h-6 rounded-lg bg-slate-800 hover:bg-slate-700 text-xs flex items-center justify-center cursor-pointer"
-                              >
-                                {emoji}
-                              </button>
-                            ))}
-                          </div>
+                          <button
+                            onClick={() => handleToggleReaction(msg.id, "⚡")}
+                            className="p-1 rounded-lg text-purple-300/50 hover:text-white hover:bg-white/10 text-xs cursor-pointer"
+                          >
+                            +
+                          </button>
                         </div>
                       </div>
                     </div>
-                  ))
-                )}
-              </div>
+                  ))}
+                  <div ref={chatBottomRef} />
+                </div>
 
-              {/* Message Input Box */}
-              <div className="p-4 bg-slate-900 border-t border-slate-800">
-                {/* Quick Emoji Popover */}
-                {showEmojiPicker && (
-                  <div className="mb-2 p-2 rounded-2xl bg-slate-800 border border-slate-700 flex items-center space-x-2 w-fit animate-in fade-in-50">
-                    {["👍", "❤️", "🚀", "🔥", "💡", "🎉", "👏", "💻", "✨"].map((emoji) => (
+                {/* Message Input Box */}
+                <div className="p-4 border-t border-white/10 bg-[#160b2b]/70 shrink-0">
+                  <form onSubmit={handleSendMessage} className="relative flex items-center">
+                    <button
+                      type="button"
+                      title="Attach File / Capstone Code"
+                      className="absolute left-3 text-purple-300/60 hover:text-white transition-colors cursor-pointer"
+                    >
+                      <Paperclip className="w-4 h-4" />
+                    </button>
+
+                    <input
+                      type="text"
+                      placeholder={`Message #${activeServer.channels.find((c) => c.id === activeChannelId)?.name || activeChannelId}`}
+                      value={inputMessage}
+                      onChange={(e) => setInputMessage(e.target.value)}
+                      className="w-full rounded-2xl bg-[#1b0d35] border border-white/10 pl-10 pr-20 py-3 text-xs text-white placeholder-purple-300/40 focus:outline-hidden focus:border-purple-500 shadow-inner"
+                    />
+
+                    <div className="absolute right-3 flex items-center space-x-1.5">
                       <button
-                        key={emoji}
-                        onClick={() => {
-                          setChatInputText((prev) => prev + " " + emoji);
-                          setShowEmojiPicker(false);
-                        }}
-                        className="text-base p-1 rounded-lg hover:bg-slate-700 transition-colors"
+                        type="button"
+                        onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                        className="p-1 text-purple-300/60 hover:text-white transition-colors cursor-pointer"
                       >
-                        {emoji}
+                        <Smile className="w-4 h-4" />
                       </button>
-                    ))}
-                  </div>
-                )}
-
-                <form
-                  onSubmit={handleSendMessage}
-                  className="rounded-2xl bg-slate-800/90 border border-slate-700 p-2 flex items-center space-x-2 focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500 transition-all"
-                >
-                  <button
-                    type="button"
-                    onClick={() => alert("Upload file or code snippet attachment")}
-                    className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-700 transition-colors"
-                    title="Attach File / Code"
-                  >
-                    <Plus className="w-4 h-4" />
-                  </button>
-
-                  <input
-                    type="text"
-                    value={chatInputText}
-                    onChange={(e) => setChatInputText(e.target.value)}
-                    placeholder={`Message #${activeChannel?.name || "general"}...`}
-                    className="flex-1 bg-transparent border-0 text-xs text-white placeholder-slate-400 focus:outline-hidden"
-                  />
-
-                  <button
-                    type="button"
-                    onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-                    className="p-2 rounded-xl text-slate-400 hover:text-amber-400 hover:bg-slate-700 transition-colors"
-                    title="Add Emoji"
-                  >
-                    <Smile className="w-4 h-4" />
-                  </button>
-
-                  <button
-                    type="submit"
-                    disabled={!chatInputText.trim()}
-                    className="p-2 rounded-xl bg-blue-600 hover:bg-blue-500 disabled:opacity-40 text-white font-bold transition-all"
-                  >
-                    <Send className="w-4 h-4" />
-                  </button>
-                </form>
+                      <button
+                        type="submit"
+                        disabled={!inputMessage.trim()}
+                        className="p-1.5 rounded-xl bg-purple-600 hover:bg-purple-500 disabled:opacity-30 text-white transition-all cursor-pointer shadow-md"
+                      >
+                        <Send className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </form>
+                </div>
               </div>
             </div>
-
-            {/* =================================================================
-                COLUMN 4: MEMBER LIST (RIGHT PANEL)
-               ================================================================= */}
-            {showMembersList && (
-              <aside className="w-56 bg-slate-900 border-l border-slate-800 p-4 space-y-4 overflow-y-auto shrink-0 hidden lg:block">
-                <div>
-                  <h4 className="text-[11px] font-extrabold text-slate-400 uppercase tracking-wider mb-2">
-                    Members — {activeServer.members.length}
-                  </h4>
-
-                  {/* Online Members */}
-                  <div className="space-y-1">
-                    {activeServer.members.map((member) => (
-                      <div
-                        key={member.id}
-                        className="flex items-center space-x-2.5 p-2 rounded-xl hover:bg-slate-800 transition-colors cursor-pointer"
-                      >
-                        <div className="relative shrink-0">
-                          <div className={`w-8 h-8 rounded-full ${member.avatarBg} text-xs font-bold flex items-center justify-center`}>
-                            {member.name.split(" ").map((n) => n[0]).slice(0, 2).join("")}
-                          </div>
-                          <span
-                            className={`absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full border-2 border-slate-900 ${
-                              member.status === "online"
-                                ? "bg-emerald-500"
-                                : member.status === "idle"
-                                ? "bg-amber-500"
-                                : "bg-slate-500"
-                            }`}
-                          />
-                        </div>
-                        <div className="min-w-0">
-                          <p className="text-xs font-bold text-slate-200 truncate">{member.name}</p>
-                          <span
-                            className={`text-[9px] font-bold px-1.5 py-0.2 rounded-full ${
-                              member.role === "Owner"
-                                ? "text-blue-400 bg-blue-950"
-                                : member.role === "Industry Partner"
-                                ? "text-amber-400 bg-amber-950"
-                                : member.role === "Mentor"
-                                ? "text-emerald-400 bg-emerald-950"
-                                : "text-slate-400 bg-slate-800"
-                            }`}
-                          >
-                            {member.role}
-                          </span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Tagged Skills Platform Integration */}
-                <div className="pt-4 border-t border-slate-800 space-y-2">
-                  <h4 className="text-[11px] font-extrabold text-slate-400 uppercase tracking-wider">
-                    Community Skills
-                  </h4>
-                  <div className="flex flex-wrap gap-1">
-                    {activeServer.taggedSkills.map((sk) => (
-                      <Link
-                        key={sk}
-                        href="/student/skills"
-                        className="text-[10px] font-semibold px-2 py-0.5 rounded-lg bg-slate-800 hover:bg-blue-600 hover:text-white text-slate-300 border border-slate-700 transition-colors"
-                      >
-                        {sk}
-                      </Link>
-                    ))}
-                  </div>
-                </div>
-              </aside>
-            )}
-          </>
+          )
         )}
       </div>
+
+      {/* =====================================================================
+          CREATE COMMUNITY MODAL (ACADEMIA & INDUSTRY ONLY)
+         ===================================================================== */}
+      {showCreateModal && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
+          <div className="bg-[#180b2e] border border-white/15 rounded-3xl shadow-2xl max-w-md w-full p-6 space-y-5 animate-in fade-in-50 duration-200">
+            <div className="flex justify-between items-center border-b border-white/10 pb-4">
+              <div>
+                <h3 className="text-lg font-black text-white">Create an Academic or Tech Guild</h3>
+                <p className="text-xs text-purple-200/60 mt-0.5">
+                  Launch a new student learning circle, research lab, or placement team.
+                </p>
+              </div>
+              <button
+                onClick={() => setShowCreateModal(false)}
+                className="w-8 h-8 rounded-full bg-white/10 text-purple-300 hover:text-white flex items-center justify-center cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <form onSubmit={handleCreateCommunitySubmit} className="space-y-4 text-xs">
+              <div>
+                <label className="font-bold text-purple-200 block mb-1 uppercase tracking-wider text-[11px]">
+                  Guild Name *
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. Distributed AI Systems, Tier-1 Placement Cohort"
+                  value={newCommunityName}
+                  onChange={(e) => setNewCommunityName(e.target.value)}
+                  className="w-full rounded-xl bg-[#21113f] border border-white/10 px-3.5 py-2.5 text-xs text-white placeholder-purple-300/40 focus:outline-hidden focus:border-purple-500"
+                />
+              </div>
+
+              <div>
+                <label className="font-bold text-purple-200 block mb-1 uppercase tracking-wider text-[11px]">
+                  Mission & Objectives
+                </label>
+                <textarea
+                  rows={2}
+                  placeholder="Describe your research, placement, or hackathon focus..."
+                  value={newCommunityDesc}
+                  onChange={(e) => setNewCommunityDesc(e.target.value)}
+                  className="w-full rounded-xl bg-[#21113f] border border-white/10 px-3.5 py-2 text-xs text-white placeholder-purple-300/40 focus:outline-hidden focus:border-purple-500"
+                />
+              </div>
+
+              <div>
+                <label className="font-bold text-purple-200 block mb-1 uppercase tracking-wider text-[11px]">
+                  Category
+                </label>
+                <select
+                  value={newCommunityCategory}
+                  onChange={(e) => setNewCommunityCategory(e.target.value)}
+                  className="w-full rounded-xl bg-[#21113f] border border-white/10 px-3.5 py-2 text-xs text-white focus:outline-hidden focus:border-purple-500"
+                >
+                  <option value="Education">Education</option>
+                  <option value="Tech">Tech</option>
+                  <option value="Industry">Industry</option>
+                  <option value="Jobs">Jobs</option>
+                  <option value="News">News</option>
+                  <option value="Students">Students</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="font-bold text-purple-200 block mb-1 uppercase tracking-wider text-[11px]">
+                  Associated Skills (Comma separated)
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g. Python, PyTorch, Kubernetes, System Design"
+                  value={newCommunitySkills}
+                  onChange={(e) => setNewCommunitySkills(e.target.value)}
+                  className="w-full rounded-xl bg-[#21113f] border border-white/10 px-3.5 py-2.5 text-xs text-white placeholder-purple-300/40 focus:outline-hidden focus:border-purple-500"
+                />
+              </div>
+
+              <div className="pt-3 border-t border-white/10 flex justify-end space-x-2">
+                <button
+                  type="button"
+                  onClick={() => setShowCreateModal(false)}
+                  className="px-4 py-2 rounded-xl bg-white/10 text-purple-200 hover:text-white font-bold cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-5 py-2 rounded-xl bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-500 hover:to-fuchsia-500 text-white font-black shadow-lg cursor-pointer"
+                >
+                  Create Community
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

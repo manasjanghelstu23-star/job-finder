@@ -65,7 +65,7 @@ export async function GET(request: Request, context: any) {
       }
     });
 
-    if (!assessment || assessment.studentId !== studentProfile.id) {
+    if (!assessment || !studentProfile || assessment.studentId !== studentProfile.id) {
       return NextResponse.json({ error: "Assessment not found or unauthorized" }, { status: 404 });
     }
 

@@ -9,6 +9,7 @@ import {
   Briefcase,
   ArrowRight,
   ArrowLeft,
+  ArrowUpRight,
   Eye,
   EyeOff,
   Loader2,
@@ -23,8 +24,24 @@ import {
 import { StudentLoginIllustration } from "./student-login-illustration";
 import { GoogleIcon, FacebookIcon, TwitterIcon, EmailBadgeIcon } from "./auth-icons";
 import { TermsModal } from "./terms-modal";
+import { EduLearnLogo } from "../student/dashboard/student-illustrations";
 import InstituteLoginPage from "../institute/login/page";
 import CompanyLoginPage from "../company/login/page";
+
+// CampusBridge Editorial Brand Logo
+export function CampusBridgeLogo({ className = "w-7 h-7" }: { className?: string }) {
+  return (
+    <div className="flex items-center space-x-2.5">
+      <div className={`${className} rounded-lg bg-[#0F5132] flex items-center justify-center text-white font-bold text-sm shadow-xs select-none tracking-tight`}>
+        C
+      </div>
+      <div className="flex items-center text-[18px] tracking-tight">
+        <span className="font-extrabold text-[#14231E]">Campus</span>
+        <span className="font-semibold text-[#52B788]">Bridge</span>
+      </div>
+    </div>
+  );
+}
 
 function LoginContent() {
   const router = useRouter();
@@ -220,10 +237,10 @@ function LoginContent() {
         <div className="absolute top-6 left-6 z-40">
           <button
             onClick={() => setSelectedPortal(null)}
-            className="flex items-center space-x-2 bg-black/50 hover:bg-black/75 backdrop-blur-md text-white text-xs font-semibold px-3.5 py-2 rounded-full border border-white/20 transition-all shadow-lg"
+            className="flex items-center space-x-2 bg-white/95 hover:bg-white text-slate-800 text-xs font-semibold px-3.5 py-2 rounded-lg border border-slate-200 transition-all shadow-md cursor-pointer"
           >
             <ArrowLeft className="w-3.5 h-3.5" />
-            <span>Select Another Portal</span>
+            <span>← All Portals</span>
           </button>
         </div>
         <InstituteLoginPage />
@@ -240,10 +257,10 @@ function LoginContent() {
         <div className="absolute top-6 right-6 sm:right-36 z-40">
           <button
             onClick={() => setSelectedPortal(null)}
-            className="flex items-center space-x-2 bg-slate-800/80 hover:bg-slate-800 text-white text-xs font-semibold px-3.5 py-1.5 rounded-full border border-slate-700 transition-all shadow-lg"
+            className="flex items-center space-x-2 bg-white/95 hover:bg-white text-slate-800 text-xs font-semibold px-3.5 py-2 rounded-lg border border-slate-200 transition-all shadow-md cursor-pointer"
           >
             <ArrowLeft className="w-3.5 h-3.5" />
-            <span>Select Another Portal</span>
+            <span>← All Portals</span>
           </button>
         </div>
         <CompanyLoginPage />
@@ -252,15 +269,15 @@ function LoginContent() {
   }
 
   // ---------------------------------------------------------------------------
-  // 3. IF STUDENT PORTAL SELECTED: RENDER PURPLE SPLIT-SCREEN STUDENT LOGIN
+  // 3. IF STUDENT PORTAL SELECTED: RENDER CLEAN BASIC STUDENT LOGIN
   // ---------------------------------------------------------------------------
   if (selectedPortal === "student") {
     return (
-      <div className="min-h-screen w-full bg-[#0f0a1c] flex items-center justify-center p-3 sm:p-6 lg:p-10 font-sans relative">
+      <div className="min-h-screen w-full bg-[#FAFAF7] flex items-center justify-center p-3 sm:p-6 lg:p-10 font-sans relative text-slate-900">
         {/* Toast Alert */}
         {studentToast && (
-          <div className="fixed top-20 left-1/2 -translate-x-1/2 z-50 bg-[#25103a] text-white px-5 py-3 rounded-2xl shadow-2xl border border-purple-500/40 flex items-center space-x-2.5 text-xs animate-bounce">
-            <Sparkles className="w-4 h-4 text-purple-300" />
+          <div className="fixed top-20 left-1/2 -translate-x-1/2 z-50 bg-[#14231E] text-white px-5 py-3 rounded-xl shadow-lg border border-[#0F5132]/40 flex items-center space-x-2.5 text-xs">
+            <Sparkles className="w-4 h-4 text-emerald-400" />
             <span>{studentToast}</span>
           </div>
         )}
@@ -269,56 +286,61 @@ function LoginContent() {
         <div className="absolute top-5 left-5 sm:left-10 z-30 flex items-center space-x-3">
           <button
             onClick={() => setSelectedPortal(null)}
-            className="flex items-center space-x-1.5 text-xs text-slate-300 hover:text-white bg-slate-800/90 hover:bg-slate-800 px-3.5 py-2 rounded-full border border-slate-700/80 transition-all shadow-md"
+            className="flex items-center space-x-1.5 text-xs font-medium text-slate-700 hover:text-slate-900 bg-white hover:bg-slate-50 px-3.5 py-2 rounded-lg border border-slate-200 transition-all shadow-xs cursor-pointer"
           >
             <ArrowLeft className="w-3.5 h-3.5" />
-            <span>Portals</span>
+            <span>All Portals</span>
           </button>
         </div>
 
-        <div className="absolute top-5 right-5 sm:right-10 z-30 hidden sm:flex items-center space-x-2 bg-slate-800/80 backdrop-blur-md px-3 py-1.5 rounded-full border border-slate-700/80 text-xs shadow-md">
-          <span className="bg-purple-600 text-white font-bold px-2.5 py-1 rounded-full shadow-xs">
+        <div className="absolute top-5 right-5 sm:right-10 z-30 hidden sm:flex items-center space-x-2 bg-white px-3 py-1.5 rounded-lg border border-slate-200 text-xs shadow-xs">
+          <span className="bg-[#0F5132] text-white font-semibold px-2.5 py-1 rounded-md">
             Student
           </span>
-          <span className="text-slate-500">|</span>
+          <span className="text-slate-300">|</span>
           <button
             onClick={() => setSelectedPortal("institute")}
-            className="text-slate-400 hover:text-white px-2 py-0.5 rounded-full transition-colors"
+            className="text-slate-600 hover:text-slate-900 px-2 py-0.5 rounded-md transition-colors cursor-pointer"
           >
-            Institute
+            Institution
           </button>
-          <span className="text-slate-500">|</span>
+          <span className="text-slate-300">|</span>
           <button
             onClick={() => setSelectedPortal("company")}
-            className="text-slate-400 hover:text-white px-2 py-0.5 rounded-full transition-colors"
+            className="text-slate-600 hover:text-slate-900 px-2 py-0.5 rounded-md transition-colors cursor-pointer"
           >
             Company
           </button>
         </div>
 
         {/* Main Split Login Card */}
-        <div className="w-full max-w-5xl bg-[#18181c] rounded-[32px] sm:rounded-[40px] overflow-hidden shadow-[0_25px_70px_-15px_rgba(0,0,0,0.7)] border border-purple-900/30 flex flex-col md:flex-row min-h-[620px]">
-          {/* Left Column: Social & Email Login Form matching design */}
-          <div className="w-full md:w-1/2 p-7 sm:p-9 lg:p-10 flex flex-col justify-between z-10 bg-[#170e24] text-white relative overflow-hidden">
-            {/* Subtle Top Ambient Glow matching screenshot */}
-            <div className="absolute -top-14 left-1/2 -translate-x-1/2 w-64 h-32 bg-purple-500/25 rounded-full blur-2xl pointer-events-none" />
+        <div className="w-full max-w-5xl bg-white rounded-2xl overflow-hidden shadow-sm border border-slate-200 flex flex-col md:flex-row min-h-[600px]">
+          {/* Left Column: Social & Email Login Form */}
+          <div className="w-full md:w-1/2 p-7 sm:p-9 lg:p-10 flex flex-col justify-between z-10 bg-white text-slate-900">
+            <div>
+              {/* Branding */}
+              <div className="mb-6">
+                <CampusBridgeLogo className="w-7 h-7" />
+              </div>
 
-            <div className="relative z-10 text-center">
-              <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
-                {formMode === "signup" ? "Create Account" : formMode === "signin" ? "Sign In" : "Welcome"}
+              <h1
+                className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight"
+                style={{ fontFamily: "'Newsreader', Georgia, 'Times New Roman', serif" }}
+              >
+                {formMode === "signup" ? "Create an Account" : formMode === "signin" ? "Sign In to Workspace" : "Welcome to CampusBridge"}
               </h1>
-              <p className="text-xs text-slate-300 font-normal leading-relaxed mt-2.5 mb-6 px-1">
+              <p className="text-xs sm:text-sm text-slate-500 font-normal leading-relaxed mt-2 mb-6">
                 {formMode === "signup"
-                  ? "Enter your details to create your student account and access verified learning."
+                  ? "Enter your details below to create your student account and access courses."
                   : formMode === "signin"
-                  ? "Enter your student credentials to log into your workspace."
-                  : "Access your student learning workspace to connect with peers, discover internship opportunities, and build your career portfolio."}
+                  ? "Enter your student credentials to log into your learning workspace."
+                  : "Assess your skills, discover opportunities, and build a verified portfolio."}
               </p>
 
               {error && (
-                <div className="mb-4 p-2.5 rounded-xl bg-red-500/20 border border-red-500/30 text-red-300 text-xs flex items-center justify-between">
+                <div className="mb-4 p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-xs flex items-center justify-between">
                   <span>{error}</span>
-                  <button onClick={() => setError("")} className="text-red-300 hover:text-white">
+                  <button onClick={() => setError("")} className="text-red-500 hover:text-red-700 cursor-pointer">
                     <X className="w-3.5 h-3.5" />
                   </button>
                 </div>
@@ -328,31 +350,31 @@ function LoginContent() {
               {formMode === "signup" && (
                 <form onSubmit={handleStudentSignup} className="space-y-3.5 text-left">
                   <div>
-                    <label className="block text-[11px] font-semibold text-slate-300 mb-1">Full Name</label>
+                    <label className="block text-[11px] font-semibold text-slate-700 mb-1">Full Name</label>
                     <input
                       type="text"
                       required
                       placeholder="e.g. Alex Morgan"
                       value={signupName}
                       onChange={(e) => setSignupName(e.target.value)}
-                      className="w-full bg-[#25133c]/80 border border-purple-500/30 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-purple-400"
+                      className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-[11px] font-semibold text-slate-300 mb-1">Email Address</label>
+                    <label className="block text-[11px] font-semibold text-slate-700 mb-1">Email Address</label>
                     <input
                       type="email"
                       required
                       placeholder="alex@university.edu"
                       value={signupEmail}
                       onChange={(e) => setSignupEmail(e.target.value)}
-                      className="w-full bg-[#25133c]/80 border border-purple-500/30 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-purple-400"
+                      className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-[11px] font-semibold text-slate-300 mb-1">Password</label>
+                    <label className="block text-[11px] font-semibold text-slate-700 mb-1">Password</label>
                     <div className="relative">
                       <input
                         type={showSignupPassword ? "text" : "password"}
@@ -360,12 +382,12 @@ function LoginContent() {
                         placeholder="At least 6 characters"
                         value={signupPassword}
                         onChange={(e) => setSignupPassword(e.target.value)}
-                        className="w-full bg-[#25133c]/80 border border-purple-500/30 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-purple-400 pr-8"
+                        className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 pr-8"
                       />
                       <button
                         type="button"
                         onClick={() => setShowSignupPassword(!showSignupPassword)}
-                        className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white"
+                        className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 cursor-pointer"
                       >
                         {showSignupPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
                       </button>
@@ -373,14 +395,14 @@ function LoginContent() {
                   </div>
 
                   <div>
-                    <label className="block text-[11px] font-semibold text-slate-300 mb-1">Confirm Password</label>
+                    <label className="block text-[11px] font-semibold text-slate-700 mb-1">Confirm Password</label>
                     <input
                       type="password"
                       required
                       placeholder="Repeat your password"
                       value={signupConfirmPassword}
                       onChange={(e) => setSignupConfirmPassword(e.target.value)}
-                      className="w-full bg-[#25133c]/80 border border-purple-500/30 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-purple-400"
+                      className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     />
                   </div>
 
@@ -388,7 +410,7 @@ function LoginContent() {
                     <button
                       type="submit"
                       disabled={loading}
-                      className="w-full py-3 rounded-2xl bg-[#8b5cf6] hover:bg-[#7c3aed] text-white font-bold text-xs shadow-xl transition-all flex items-center justify-center space-x-2 active:scale-[0.99] disabled:opacity-70 cursor-pointer"
+                      className="w-full py-2.5 rounded-lg bg-[#0F5132] hover:bg-[#0A3622] text-white font-semibold text-xs shadow-xs transition-colors flex items-center justify-center space-x-2 active:scale-[0.99] disabled:opacity-70 cursor-pointer"
                     >
                       {loading ? (
                         <>
@@ -396,7 +418,7 @@ function LoginContent() {
                           <span>Creating account...</span>
                         </>
                       ) : (
-                        <span>CREATE ACCOUNT</span>
+                        <span>Create Account</span>
                       )}
                     </button>
                   </div>
@@ -405,14 +427,14 @@ function LoginContent() {
                     <button
                       type="button"
                       onClick={() => setFormMode("social")}
-                      className="text-purple-300 hover:text-white underline cursor-pointer"
+                      className="text-[#0F5132] hover:underline cursor-pointer"
                     >
                       ← Back to all options
                     </button>
                     <button
                       type="button"
                       onClick={() => setFormMode("signin")}
-                      className="text-slate-300 hover:text-white font-semibold cursor-pointer"
+                      className="text-slate-600 hover:text-slate-900 font-semibold cursor-pointer"
                     >
                       Already have an account? Sign in
                     </button>
@@ -424,34 +446,34 @@ function LoginContent() {
               {formMode === "signin" && (
                 <form onSubmit={handleStudentLogin} className="space-y-4 text-left">
                   <div>
-                    <label className="block text-xs font-semibold text-slate-300 mb-1">Student Username / Email</label>
-                    <div className="flex items-center bg-[#25133c]/80 border border-purple-500/30 rounded-xl px-3 py-2.5 text-xs">
+                    <label className="block text-xs font-semibold text-slate-700 mb-1">Student Username / Email</label>
+                    <div className="flex items-center bg-white border border-slate-300 rounded-lg px-3 py-2 text-xs focus-within:ring-2 focus-within:ring-[#0F5132] focus-within:border-[#0F5132]">
                       <input
                         type="text"
                         required
                         placeholder="student@demo.com or username"
                         value={username}
                         onChange={(e) => setUsername(e.target.value)}
-                        className="w-full bg-transparent text-white placeholder-slate-500 focus:outline-none text-xs"
+                        className="w-full bg-transparent text-slate-900 placeholder:text-slate-400 focus:outline-none text-xs"
                       />
                     </div>
                   </div>
 
                   <div>
-                    <label className="block text-xs font-semibold text-slate-300 mb-1">Password</label>
-                    <div className="flex items-center bg-[#25133c]/80 border border-purple-500/30 rounded-xl px-3 py-2.5 text-xs relative">
+                    <label className="block text-xs font-semibold text-slate-700 mb-1">Password</label>
+                    <div className="flex items-center bg-white border border-slate-300 rounded-lg px-3 py-2 text-xs relative focus-within:ring-2 focus-within:ring-[#0F5132] focus-within:border-[#0F5132]">
                       <input
                         type={showPassword ? "text" : "password"}
                         required
                         placeholder="••••••••"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        className="w-full bg-transparent text-white placeholder-slate-500 focus:outline-none text-xs pr-6"
+                        className="w-full bg-transparent text-slate-900 placeholder:text-slate-400 focus:outline-none text-xs pr-6"
                       />
                       <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
-                        className="text-slate-400 hover:text-white cursor-pointer"
+                        className="text-slate-400 hover:text-slate-700 cursor-pointer"
                       >
                         {showPassword ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
                       </button>
@@ -462,7 +484,7 @@ function LoginContent() {
                     <button
                       type="submit"
                       disabled={loading}
-                      className="w-full py-3.5 rounded-2xl bg-[#8b5cf6] hover:bg-[#7c3aed] text-white font-bold text-xs shadow-xl transition-all flex items-center justify-center space-x-2 active:scale-[0.99] disabled:opacity-70 cursor-pointer"
+                      className="w-full py-2.5 rounded-lg bg-[#0F5132] hover:bg-[#0A3622] text-white font-semibold text-xs shadow-xs transition-colors flex items-center justify-center space-x-2 active:scale-[0.99] disabled:opacity-70 cursor-pointer"
                     >
                       {loading ? (
                         <>
@@ -470,7 +492,7 @@ function LoginContent() {
                           <span>Signing in...</span>
                         </>
                       ) : (
-                        <span>LOGIN</span>
+                        <span>Sign In</span>
                       )}
                     </button>
                   </div>
@@ -479,14 +501,14 @@ function LoginContent() {
                     <button
                       type="button"
                       onClick={() => setShowForgotModal(true)}
-                      className="text-slate-400 hover:text-purple-300 cursor-pointer"
+                      className="text-slate-500 hover:text-[#0F5132] cursor-pointer"
                     >
-                      Forgot Password ?
+                      Forgot password?
                     </button>
                     <button
                       type="button"
                       onClick={() => setFormMode("social")}
-                      className="text-purple-300 hover:text-white underline cursor-pointer"
+                      className="text-[#0F5132] hover:underline cursor-pointer"
                     >
                       ← Other options
                     </button>
@@ -494,137 +516,161 @@ function LoginContent() {
                 </form>
               )}
 
-              {/* MODE 3: SOCIAL BUTTONS (Default UI matching screenshot) */}
+              {/* MODE 3: SOCIAL BUTTONS (Default UI) */}
               {formMode === "social" && (
-                <div className="space-y-3">
+                <div className="space-y-2.5">
                   {/* 1. Google */}
                   <button
                     onClick={() => handleStudentOAuth("google")}
                     disabled={Boolean(oauthLoading)}
-                    className="w-full py-3.5 px-5 rounded-2xl bg-[#2b1747] hover:bg-[#381e5c] text-white text-[13px] font-semibold border border-purple-500/20 shadow-md hover:shadow-purple-900/30 transition-all flex items-center justify-center space-x-3 active:scale-[0.99] group disabled:opacity-60 cursor-pointer"
+                    className="w-full py-2.5 px-4 rounded-lg bg-white hover:bg-slate-50 text-slate-700 text-xs font-medium border border-slate-300 shadow-xs transition-colors flex items-center justify-center space-x-3 active:scale-[0.99] group disabled:opacity-60 cursor-pointer"
                   >
                     {oauthLoading === "google" ? (
-                      <Loader2 className="w-4 h-4 animate-spin text-white" />
+                      <Loader2 className="w-4 h-4 animate-spin text-[#0F5132]" />
                     ) : (
-                      <GoogleIcon className="w-4 h-4 transition-transform group-hover:scale-110" />
+                      <GoogleIcon className="w-4 h-4 transition-transform group-hover:scale-105" />
                     )}
-                    <span>{oauthLoading === "google" ? "Connecting Google..." : "Sign in with Google"}</span>
+                    <span>{oauthLoading === "google" ? "Connecting Google..." : "Continue with Google"}</span>
                   </button>
 
                   {/* 2. Facebook */}
                   <button
                     onClick={() => handleStudentOAuth("facebook")}
                     disabled={Boolean(oauthLoading)}
-                    className="w-full py-3.5 px-5 rounded-2xl bg-[#2b1747] hover:bg-[#381e5c] text-white text-[13px] font-semibold border border-purple-500/20 shadow-md hover:shadow-purple-900/30 transition-all flex items-center justify-center space-x-3 active:scale-[0.99] group disabled:opacity-60 cursor-pointer"
+                    className="w-full py-2.5 px-4 rounded-lg bg-white hover:bg-slate-50 text-slate-700 text-xs font-medium border border-slate-300 shadow-xs transition-colors flex items-center justify-center space-x-3 active:scale-[0.99] group disabled:opacity-60 cursor-pointer"
                   >
                     {oauthLoading === "facebook" ? (
-                      <Loader2 className="w-4 h-4 animate-spin text-white" />
+                      <Loader2 className="w-4 h-4 animate-spin text-[#0F5132]" />
                     ) : (
-                      <FacebookIcon className="w-4 h-4 transition-transform group-hover:scale-110" />
+                      <FacebookIcon className="w-4 h-4 transition-transform group-hover:scale-105" />
                     )}
-                    <span>{oauthLoading === "facebook" ? "Connecting Facebook..." : "Sign in with Facebook"}</span>
+                    <span>{oauthLoading === "facebook" ? "Connecting Facebook..." : "Continue with Facebook"}</span>
                   </button>
 
                   {/* 3. Twitter */}
                   <button
                     onClick={() => handleStudentOAuth("twitter")}
                     disabled={Boolean(oauthLoading)}
-                    className="w-full py-3.5 px-5 rounded-2xl bg-[#2b1747] hover:bg-[#381e5c] text-white text-[13px] font-semibold border border-purple-500/20 shadow-md hover:shadow-purple-900/30 transition-all flex items-center justify-center space-x-3 active:scale-[0.99] group disabled:opacity-60 cursor-pointer"
+                    className="w-full py-2.5 px-4 rounded-lg bg-white hover:bg-slate-50 text-slate-700 text-xs font-medium border border-slate-300 shadow-xs transition-colors flex items-center justify-center space-x-3 active:scale-[0.99] group disabled:opacity-60 cursor-pointer"
                   >
                     {oauthLoading === "twitter" ? (
-                      <Loader2 className="w-4 h-4 animate-spin text-white" />
+                      <Loader2 className="w-4 h-4 animate-spin text-[#0F5132]" />
                     ) : (
-                      <TwitterIcon className="w-4 h-4 transition-transform group-hover:scale-110" />
+                      <TwitterIcon className="w-4 h-4 transition-transform group-hover:scale-105" />
                     )}
-                    <span>{oauthLoading === "twitter" ? "Connecting Twitter..." : "Sign in with Twitter"}</span>
+                    <span>{oauthLoading === "twitter" ? "Connecting Twitter..." : "Continue with Twitter"}</span>
                   </button>
 
-                  {/* 4. Sign up with email */}
+                  <div className="relative my-3 text-center">
+                    <div className="absolute inset-0 flex items-center">
+                      <div className="w-full border-t border-slate-200" />
+                    </div>
+                    <span className="relative bg-white px-2.5 text-[11px] text-slate-400 uppercase font-medium">Or</span>
+                  </div>
+
+                  {/* Sign in with Email & Password */}
+                  <button
+                    onClick={() => {
+                      setError("");
+                      setFormMode("signin");
+                    }}
+                    className="w-full py-2.5 px-4 rounded-lg bg-[#14231E] hover:bg-black text-white text-xs font-semibold shadow-xs transition-colors flex items-center justify-center space-x-2 cursor-pointer"
+                  >
+                    <EmailBadgeIcon className="w-4 h-4" />
+                    <span>Sign in with Email & Password</span>
+                  </button>
+
+                  {/* Sign up */}
                   <button
                     onClick={() => {
                       setError("");
                       setFormMode("signup");
                     }}
-                    className="w-full py-3.5 px-5 rounded-2xl bg-[#2b1747] hover:bg-[#381e5c] text-white text-[13px] font-semibold border border-purple-500/20 shadow-md hover:shadow-purple-900/30 transition-all flex items-center justify-center space-x-3 active:scale-[0.99] group cursor-pointer"
+                    className="w-full py-2 px-4 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-50 text-xs font-medium transition-colors flex items-center justify-center space-x-2 cursor-pointer"
                   >
-                    <EmailBadgeIcon className="w-4 h-4 transition-transform group-hover:scale-110" />
-                    <span>Sign up with email</span>
+                    <span>Create a new student account</span>
                   </button>
                 </div>
               )}
             </div>
 
-            {/* Demo & Footer matching screenshot */}
-            <div className="relative z-10">
-              <div className="mt-5 pt-3.5 border-t border-purple-500/20 flex items-center justify-between text-xs text-slate-300">
-                <span>Demo: student@demo.com</span>
+            {/* Demo & Footer */}
+            <div>
+              <div className="mt-5 pt-3.5 border-t border-slate-100 flex items-center justify-between text-xs text-slate-600">
+                <span>Demo: <strong className="text-slate-800 font-semibold">student@demo.com</strong></span>
                 <button
                   type="button"
                   onClick={handleAutofill}
                   disabled={loading}
-                  className="text-white underline font-semibold hover:text-purple-300 cursor-pointer disabled:opacity-60"
+                  className="text-[#0F5132] underline font-semibold hover:text-[#0A3622] cursor-pointer disabled:opacity-60"
                 >
-                  {loading ? "Signing in..." : "Autofill"}
+                  {loading ? "Signing in..." : "Auto-fill"}
                 </button>
               </div>
 
-              <div className="mt-4 pt-3.5 border-t border-purple-500/20">
-                <div className="flex items-center justify-between text-xs text-slate-300">
-                  <span>No account?</span>
-                  <button
-                    onClick={() => {
-                      setError("");
-                      setFormMode("signup");
-                    }}
-                    className="text-white font-bold hover:underline cursor-pointer"
-                  >
-                    Create account
-                  </button>
-                </div>
+              <div className="mt-3 pt-2 text-center">
                 <button
                   onClick={() => setShowTermsModal(true)}
-                  className="text-[11px] text-slate-400 hover:text-white underline mt-3 block mx-auto transition-colors cursor-pointer"
+                  className="text-[11px] text-slate-400 hover:text-slate-600 underline transition-colors cursor-pointer"
                 >
-                  Terms of service
+                  Terms of Service & Privacy
                 </button>
               </div>
             </div>
-
           </div>
 
-          {/* Right Column: Purple Welcome & Vector Illustration */}
-          <div className="w-full md:w-1/2 bg-[#8657f6] p-8 sm:p-10 lg:p-12 flex flex-col justify-between relative overflow-hidden text-white">
-            <div className="absolute top-0 right-0 w-80 h-80 bg-purple-400/20 rounded-full blur-3xl pointer-events-none" />
-            <div className="relative z-10">
-              <h2 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight leading-tight">
-                Welcome to<br />
-                student portal
+          {/* Right Column: Clean Light Product Highlights & Vector Illustration */}
+          <div className="w-full md:w-1/2 bg-[#F6F7F3] border-t md:border-t-0 md:border-l border-slate-200 p-8 sm:p-10 lg:p-12 flex flex-col justify-between text-slate-900">
+            <div>
+              <div className="inline-flex items-center space-x-2 px-2.5 py-1 rounded-md bg-[#E8F5E9] text-[#1B5E20] border border-[#0F5132]/20 text-xs font-semibold mb-3">
+                <GraduationCap className="w-3.5 h-3.5" />
+                <span>Student Learning Platform</span>
+              </div>
+              <h2
+                className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight leading-snug"
+                style={{ fontFamily: "'Newsreader', Georgia, 'Times New Roman', serif" }}
+              >
+                Learn, assess skills & kickstart your career.
               </h2>
-              <p className="text-xs sm:text-sm text-purple-100/90 mt-2.5 font-medium">
-                Login to access your account
+              <p className="text-xs sm:text-sm text-slate-600 mt-2.5 leading-relaxed">
+                Master verified skills, collaborate in Discord-style student communities, and unlock direct placement opportunities with top recruiters.
               </p>
+
+              <div className="mt-6 space-y-3">
+                <div className="flex items-start space-x-2.5 text-xs text-slate-700">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0 mt-0.5" />
+                  <span>Verified skill assessments & benchmark scorecards</span>
+                </div>
+                <div className="flex items-start space-x-2.5 text-xs text-slate-700">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0 mt-0.5" />
+                  <span>Curated internship matches & campus hiring drives</span>
+                </div>
+                <div className="flex items-start space-x-2.5 text-xs text-slate-700">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0 mt-0.5" />
+                  <span>Discord-style peer study channels & voice study rooms</span>
+                </div>
+              </div>
             </div>
 
-            <div className="relative z-10 w-full mt-4 flex items-end justify-center pointer-events-none select-none">
-              <StudentLoginIllustration className="w-full max-h-[340px] object-contain drop-shadow-lg" />
+            <div className="w-full mt-6 flex items-center justify-center">
+              <StudentLoginIllustration className="w-full max-h-[260px] object-contain" />
             </div>
           </div>
         </div>
 
-
         {/* Forgot Password Modal */}
         {showForgotModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <div className="fixed inset-0 bg-black/60 backdrop-blur-xs" onClick={() => setShowForgotModal(false)} />
-            <div className="relative bg-[#1c1c22] rounded-3xl p-6 sm:p-7 max-w-sm w-full shadow-2xl border border-slate-800 z-50 text-white">
-              <div className="flex items-center justify-between pb-3 border-b border-slate-800">
-                <h4 className="text-base font-bold text-white">Reset Password</h4>
+            <div className="fixed inset-0 bg-black/40 backdrop-blur-xs" onClick={() => setShowForgotModal(false)} />
+            <div className="relative bg-white rounded-2xl p-6 sm:p-7 max-w-sm w-full shadow-xl border border-slate-200 z-50 text-slate-900">
+              <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                <h4 className="text-sm font-bold text-slate-900">Reset Password</h4>
                 <button
                   onClick={() => {
                     setShowForgotModal(false);
                     setForgotSubmitted(false);
                   }}
-                  className="p-1 rounded-lg text-slate-400 hover:text-white"
+                  className="p-1 rounded-lg text-slate-400 hover:text-slate-600 cursor-pointer"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -632,19 +678,19 @@ function LoginContent() {
 
               {forgotSubmitted ? (
                 <div className="py-6 text-center space-y-3">
-                  <div className="w-10 h-10 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center mx-auto">
-                    <Sparkles className="w-5 h-5" />
+                  <div className="w-10 h-10 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto border border-emerald-200">
+                    <CheckCircle2 className="w-5 h-5" />
                   </div>
-                  <p className="text-sm font-bold text-white">Check Your Inbox</p>
-                  <p className="text-xs text-slate-400">
-                    Reset link has been dispatched to <span className="text-purple-400 font-semibold">{forgotEmail}</span>.
+                  <p className="text-sm font-bold text-slate-900">Check Your Inbox</p>
+                  <p className="text-xs text-slate-600">
+                    Password reset link has been dispatched to <span className="text-blue-600 font-semibold">{forgotEmail}</span>.
                   </p>
                   <button
                     onClick={() => {
                       setShowForgotModal(false);
                       setForgotSubmitted(false);
                     }}
-                    className="w-full py-2.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs mt-2"
+                    className="w-full py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs mt-2 cursor-pointer"
                   >
                     Done
                   </button>
@@ -657,7 +703,7 @@ function LoginContent() {
                   }}
                   className="mt-4 space-y-4 text-xs"
                 >
-                  <p className="text-slate-400">
+                  <p className="text-slate-600">
                     Enter your student email address to receive password reset instructions.
                   </p>
                   <div>
@@ -667,20 +713,20 @@ function LoginContent() {
                       placeholder="student@demo.com"
                       value={forgotEmail}
                       onChange={(e) => setForgotEmail(e.target.value)}
-                      className="w-full px-3.5 py-2.5 rounded-xl bg-slate-900 border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:border-purple-400"
+                      className="w-full px-3 py-2 rounded-lg bg-white border border-slate-300 text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-xs"
                     />
                   </div>
                   <div className="flex justify-end space-x-2 pt-2">
                     <button
                       type="button"
                       onClick={() => setShowForgotModal(false)}
-                      className="px-3 py-2 rounded-xl text-slate-400 hover:text-white font-semibold"
+                      className="px-3 py-2 rounded-lg text-slate-600 hover:text-slate-900 font-medium cursor-pointer"
                     >
                       Cancel
                     </button>
                     <button
                       type="submit"
-                      className="px-4 py-2 rounded-xl bg-[#8b5cf6] hover:bg-[#7c3aed] text-white font-bold transition-colors"
+                      className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold cursor-pointer transition-colors"
                     >
                       Send Link
                     </button>
@@ -702,223 +748,173 @@ function LoginContent() {
   }
 
   // ---------------------------------------------------------------------------
-  // 4. DEFAULT: PORTAL SELECTION GATEWAY SCREEN (ASK STUDENT / INSTITUTE / COMPANY)
+  // 4. DEFAULT: CAMPUSBRIDGE PORTAL SELECTION (STUDENT, COMPANY, INSTITUTION)
   // ---------------------------------------------------------------------------
   return (
-    <div className="min-h-screen w-full bg-[#0d111c] text-slate-100 flex flex-col justify-between font-sans relative overflow-x-hidden p-4 sm:p-8 lg:p-12">
-      {/* Decorative Background Lighting */}
-      <div className="fixed -top-24 left-1/4 w-[500px] h-[500px] bg-purple-600/15 rounded-full blur-[140px] pointer-events-none" />
-      <div className="fixed -bottom-24 right-1/4 w-[500px] h-[500px] bg-emerald-600/12 rounded-full blur-[140px] pointer-events-none" />
-      <div className="fixed top-1/2 -right-24 w-[400px] h-[400px] bg-blue-600/15 rounded-full blur-[140px] pointer-events-none" />
+    <div className="min-h-screen w-full bg-[#FAFAF7] text-slate-900 flex flex-col justify-between font-sans relative p-4 sm:p-8 lg:p-12 selection:bg-[#E8F5E9] selection:text-[#0F5132]">
+      {/* TOP NAVBAR */}
+      <header className="max-w-6xl w-full mx-auto flex items-center justify-between pb-6 sm:pb-8">
+        <CampusBridgeLogo className="w-8 h-8" />
 
-      {/* TOP HEADER */}
-      <header className="relative z-20 max-w-6xl w-full mx-auto flex items-center justify-between pb-6 sm:pb-10 border-b border-slate-800/60">
-        <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-purple-600 via-blue-600 to-emerald-500 p-0.5 flex items-center justify-center shadow-lg shadow-purple-500/20">
-            <div className="w-full h-full bg-[#0d111c] rounded-[14px] flex items-center justify-center">
-              <Sparkles className="w-5 h-5 text-purple-400" />
-            </div>
-          </div>
-          <div>
-            <h3 className="text-lg font-black tracking-tight text-white">Unified Platform Gateway</h3>
-            <p className="text-xs text-slate-400">Education, Institutional Governance & Industry Placement</p>
-          </div>
+        <div className="flex items-center text-xs text-slate-500 font-normal">
+          <span>Already have access?</span>
+          <button
+            onClick={() => setSelectedPortal("student")}
+            className="ml-1.5 font-semibold text-[#0F5132] hover:underline cursor-pointer transition-colors"
+          >
+            Sign in
+          </button>
         </div>
-
-        <Link
-          href="/register"
-          className="text-xs font-semibold text-slate-300 hover:text-white bg-slate-800/80 hover:bg-slate-700 px-4 py-2 rounded-xl border border-slate-700/80 transition-all shadow-xs"
-        >
-          Create New Account
-        </Link>
       </header>
 
-      {/* CENTER GATEWAY: SELECT PORTAL */}
-      <main className="relative z-20 max-w-6xl w-full mx-auto py-8 sm:py-12 my-auto">
-        {/* Title & Prompt */}
-        <div className="text-center max-w-2xl mx-auto mb-10 sm:mb-14">
-          <span className="inline-block text-[11px] font-extrabold uppercase tracking-widest px-3.5 py-1 rounded-full bg-purple-500/15 text-purple-400 border border-purple-500/30 mb-3">
-            Authentication Gateway
-          </span>
-          <h1 className="text-3xl sm:text-5xl font-black text-white tracking-tight leading-tight">
-            Select Your Portal
+      {/* CENTER SECTION */}
+      <main className="max-w-5xl w-full mx-auto py-6 sm:py-12 my-auto">
+        {/* Eyebrow, Title & Subtitle */}
+        <div className="text-center mb-10 sm:mb-14">
+          <p className="text-[10px] sm:text-[11px] font-mono tracking-[0.25em] text-[#6C757D] uppercase font-semibold mb-3.5">
+            ACADEMIA × INDUSTRY COLLABORATION
+          </p>
+          <h1
+            className="text-4xl sm:text-5xl lg:text-[58px] leading-[1.12] tracking-tight text-slate-900 font-normal"
+            style={{ fontFamily: "'Newsreader', Georgia, 'Times New Roman', serif" }}
+          >
+            Where do you belong <br />
+            <span className="text-[#0F5132]" style={{ fontFamily: "'Newsreader', Georgia, 'Times New Roman', serif" }}>
+              in the bridge?
+            </span>
           </h1>
-          <p className="text-sm sm:text-base text-slate-400 mt-3 font-medium">
-            Please select your role to proceed to your dedicated portal and customized login dashboard.
+          <p className="text-xs sm:text-sm text-slate-500 mt-3 font-normal max-w-md mx-auto">
+            Choose your workspace to get a tailored CampusBridge experience.
           </p>
         </div>
 
-        {/* 3 PORTAL CARDS */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-7">
-          {/* =========================================
-              CARD 1: STUDENT PORTAL (EduLearn)
-             ========================================= */}
+        {/* 3 ROLE CARDS (Student, Company, Institution) */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-6">
+          {/* 1. STUDENT */}
           <div
             onClick={() => setSelectedPortal("student")}
-            className="group relative bg-[#131726]/90 hover:bg-[#181d30] border border-purple-500/30 hover:border-purple-500/70 rounded-3xl p-7 transition-all duration-300 cursor-pointer shadow-xl hover:shadow-[0_20px_50px_rgba(139,92,246,0.2)] flex flex-col justify-between hover:-translate-y-1.5"
+            className="bg-white rounded-[22px] p-6 sm:p-7 border border-slate-200/90 shadow-[0_4px_20px_rgba(0,0,0,0.02)] hover:shadow-xl hover:border-slate-300 transition-all duration-300 flex flex-col justify-between group cursor-pointer min-h-[300px]"
           >
-            <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/10 rounded-full blur-2xl group-hover:bg-purple-500/20 transition-all pointer-events-none" />
-
             <div>
-              {/* Badge & Icon */}
-              <div className="flex items-center justify-between mb-5">
-                <div className="w-14 h-14 rounded-2xl bg-purple-600/20 border border-purple-500/30 text-purple-400 flex items-center justify-center shadow-lg group-hover:scale-110 group-hover:bg-purple-600 group-hover:text-white transition-all">
-                  <GraduationCap className="w-7 h-7" />
+              <div className="flex items-center justify-between">
+                <div className="w-11 h-11 rounded-2xl bg-[#E8F5E9] text-[#1B5E20] flex items-center justify-center shadow-xs">
+                  <svg className="w-5 h-5 text-[#2E7D32]" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2C12 7.5 16.5 12 22 12C16.5 12 12 16.5 12 22C12 16.5 7.5 12 2 12C7.5 12 12 7.5 12 2Z" />
+                  </svg>
                 </div>
-                <span className="text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-1 rounded-full bg-purple-950 text-purple-300 border border-purple-800">
-                  EduLearn
-                </span>
+                <ArrowUpRight className="w-4 h-4 text-slate-300 group-hover:text-slate-600 transition-colors" />
               </div>
 
-              {/* Title & Description */}
-              <h2 className="text-xl sm:text-2xl font-black text-white group-hover:text-purple-300 transition-colors">
-                Student Portal
-              </h2>
-              <p className="text-xs text-purple-300/80 font-semibold mt-1">For Students & Learners</p>
-              <p className="text-xs text-slate-400 mt-3 leading-relaxed">
-                Access your learning courses, skill verifications, interactive friends connect, and internship applications.
+              <p className="text-[10px] font-mono tracking-[0.2em] text-[#8C98A4] uppercase font-semibold mt-7 mb-2">
+                LEARN · GROW · LAUNCH
               </p>
-
-              {/* Feature Tags */}
-              <div className="flex flex-wrap gap-1.5 mt-5">
-                {["EduLearn Dashboard", "Course Catalog", "Friends Connect", "Career Opportunities"].map((tag) => (
-                  <span
-                    key={tag}
-                    className="text-[10px] font-medium px-2 py-0.5 rounded-md bg-purple-500/10 text-purple-300 border border-purple-500/20"
-                  >
-                    {tag}
-                  </span>
-                ))}
-              </div>
+              <h2
+                className="text-2xl font-bold text-slate-900 mb-2"
+                style={{ fontFamily: "'Newsreader', Georgia, 'Times New Roman', serif" }}
+              >
+                Student
+              </h2>
+              <p className="text-xs sm:text-[13px] text-slate-500 leading-relaxed min-h-[44px]">
+                Assess your skills, discover opportunities, and build a verified portfolio.
+              </p>
             </div>
 
-            {/* Action Button */}
-            <div className="mt-8 pt-4 border-t border-slate-800 flex items-center justify-between text-xs font-bold text-purple-400 group-hover:text-white">
-              <span>Enter Student Portal</span>
-              <div className="w-8 h-8 rounded-full bg-purple-500/20 group-hover:bg-purple-600 text-purple-300 group-hover:text-white flex items-center justify-center transition-all">
-                <ArrowRight className="w-4 h-4" />
-              </div>
+            <div className="mt-8 pt-2 flex items-center text-xs font-semibold text-[#0F5132] group-hover:underline">
+              <span>Enter as a student</span>
+              <span className="ml-1 text-sm font-sans">→</span>
             </div>
           </div>
 
-          {/* =========================================
-              CARD 2: INSTITUTE PORTAL (MyCampusDays)
-             ========================================= */}
-          <div
-            onClick={() => setSelectedPortal("institute")}
-            className="group relative bg-[#131726]/90 hover:bg-[#181d30] border border-emerald-500/30 hover:border-emerald-500/70 rounded-3xl p-7 transition-all duration-300 cursor-pointer shadow-xl hover:shadow-[0_20px_50px_rgba(16,185,129,0.2)] flex flex-col justify-between hover:-translate-y-1.5"
-          >
-            <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 rounded-full blur-2xl group-hover:bg-emerald-500/20 transition-all pointer-events-none" />
-
-            <div>
-              {/* Badge & Icon */}
-              <div className="flex items-center justify-between mb-5">
-                <div className="w-14 h-14 rounded-2xl bg-emerald-600/20 border border-emerald-500/30 text-emerald-400 flex items-center justify-center shadow-lg group-hover:scale-110 group-hover:bg-emerald-600 group-hover:text-white transition-all">
-                  <School className="w-7 h-7" />
-                </div>
-                <span className="text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-1 rounded-full bg-emerald-950 text-emerald-300 border border-emerald-800">
-                  MyCampusDays
-                </span>
-              </div>
-
-              {/* Title & Description */}
-              <h2 className="text-xl sm:text-2xl font-black text-white group-hover:text-emerald-300 transition-colors">
-                Institute Portal
-              </h2>
-              <p className="text-xs text-emerald-300/80 font-semibold mt-1">For Colleges & Universities</p>
-              <p className="text-xs text-slate-400 mt-3 leading-relaxed">
-                Manage academic departments, benchmark student assessment performance, track cohorts, and oversee campus placement metrics.
-              </p>
-
-              {/* Feature Tags */}
-              <div className="flex flex-wrap gap-1.5 mt-5">
-                {["Campus Hallway UI", "Student Benchmarks", "Cohort Analytics", "Accreditation"].map((tag) => (
-                  <span
-                    key={tag}
-                    className="text-[10px] font-medium px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-300 border border-emerald-500/20"
-                  >
-                    {tag}
-                  </span>
-                ))}
-              </div>
-            </div>
-
-            {/* Action Button */}
-            <div className="mt-8 pt-4 border-t border-slate-800 flex items-center justify-between text-xs font-bold text-emerald-400 group-hover:text-white">
-              <span>Enter Institute Portal</span>
-              <div className="w-8 h-8 rounded-full bg-emerald-500/20 group-hover:bg-emerald-600 text-emerald-300 group-hover:text-white flex items-center justify-center transition-all">
-                <ArrowRight className="w-4 h-4" />
-              </div>
-            </div>
-          </div>
-
-          {/* =========================================
-              CARD 3: COMPANY PORTAL (TalentRecruit)
-             ========================================= */}
+          {/* 2. COMPANY */}
           <div
             onClick={() => setSelectedPortal("company")}
-            className="group relative bg-[#131726]/90 hover:bg-[#181d30] border border-blue-500/30 hover:border-blue-500/70 rounded-3xl p-7 transition-all duration-300 cursor-pointer shadow-xl hover:shadow-[0_20px_50px_rgba(59,130,246,0.2)] flex flex-col justify-between hover:-translate-y-1.5"
+            className="bg-white rounded-[22px] p-6 sm:p-7 border border-slate-200/90 shadow-[0_4px_20px_rgba(0,0,0,0.02)] hover:shadow-xl hover:border-slate-300 transition-all duration-300 flex flex-col justify-between group cursor-pointer min-h-[300px]"
           >
-            <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 rounded-full blur-2xl group-hover:bg-blue-500/20 transition-all pointer-events-none" />
-
             <div>
-              {/* Badge & Icon */}
-              <div className="flex items-center justify-between mb-5">
-                <div className="w-14 h-14 rounded-2xl bg-blue-600/20 border border-blue-500/30 text-blue-400 flex items-center justify-center shadow-lg group-hover:scale-110 group-hover:bg-blue-600 group-hover:text-white transition-all">
-                  <Briefcase className="w-7 h-7" />
+              <div className="flex items-center justify-between">
+                <div className="w-11 h-11 rounded-2xl bg-[#EBF3FE] text-[#1A73E8] flex items-center justify-center shadow-xs">
+                  <svg className="w-5 h-5 text-[#1A73E8]" viewBox="0 0 24 24" fill="currentColor">
+                    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+                  </svg>
                 </div>
-                <span className="text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-1 rounded-full bg-blue-950 text-blue-300 border border-blue-800">
-                  TalentRecruit
-                </span>
+                <ArrowUpRight className="w-4 h-4 text-slate-300 group-hover:text-slate-600 transition-colors" />
               </div>
 
-              {/* Title & Description */}
-              <h2 className="text-xl sm:text-2xl font-black text-white group-hover:text-blue-300 transition-colors">
-                Company Portal
-              </h2>
-              <p className="text-xs text-blue-300/80 font-semibold mt-1">For Employers & Recruiters</p>
-              <p className="text-xs text-slate-400 mt-3 leading-relaxed">
-                Publish internships & job postings, review skill-verified candidates, and hire top talent directly from partner institutions.
+              <p className="text-[10px] font-mono tracking-[0.2em] text-[#8C98A4] uppercase font-semibold mt-7 mb-2">
+                HIRE · TRAIN · COLLABORATE
               </p>
-
-              {/* Feature Tags */}
-              <div className="flex flex-wrap gap-1.5 mt-5">
-                {["Job Postings", "Skill Match Engine", "Candidate Review", "Internship Tracking"].map((tag) => (
-                  <span
-                    key={tag}
-                    className="text-[10px] font-medium px-2 py-0.5 rounded-md bg-blue-500/10 text-blue-300 border border-blue-500/20"
-                  >
-                    {tag}
-                  </span>
-                ))}
-              </div>
+              <h2
+                className="text-2xl font-bold text-slate-900 mb-2"
+                style={{ fontFamily: "'Newsreader', Georgia, 'Times New Roman', serif" }}
+              >
+                Company
+              </h2>
+              <p className="text-xs sm:text-[13px] text-slate-500 leading-relaxed min-h-[44px]">
+                Find skill-matched talent and build meaningful campus connections.
+              </p>
             </div>
 
-            {/* Action Button */}
-            <div className="mt-8 pt-4 border-t border-slate-800 flex items-center justify-between text-xs font-bold text-blue-400 group-hover:text-white">
-              <span>Enter Company Portal</span>
-              <div className="w-8 h-8 rounded-full bg-blue-500/20 group-hover:bg-blue-600 text-blue-300 group-hover:text-white flex items-center justify-center transition-all">
-                <ArrowRight className="w-4 h-4" />
+            <div className="mt-8 pt-2 flex items-center text-xs font-semibold text-slate-600 group-hover:text-[#0F5132] group-hover:underline">
+              <span>Enter as a company</span>
+              <span className="ml-1 text-sm font-sans">→</span>
+            </div>
+          </div>
+
+          {/* 3. INSTITUTION */}
+          <div
+            onClick={() => setSelectedPortal("institute")}
+            className="bg-white rounded-[22px] p-6 sm:p-7 border border-[#0F5132]/35 shadow-[0_12px_36px_rgba(15,81,50,0.08)] ring-1 ring-[#0F5132]/25 hover:shadow-[0_16px_44px_rgba(15,81,50,0.13)] transition-all duration-300 flex flex-col justify-between group cursor-pointer min-h-[300px]"
+          >
+            <div>
+              <div className="flex items-center justify-between">
+                <div className="w-11 h-11 rounded-2xl bg-[#E8F5E9] text-[#1B5E20] flex items-center justify-center shadow-xs">
+                  <svg className="w-5 h-5 text-[#2E7D32]" viewBox="0 0 24 24" fill="currentColor">
+                    <rect x="3" y="3" width="4.5" height="4.5" rx="1" />
+                    <rect x="9.75" y="3" width="4.5" height="4.5" rx="1" />
+                    <rect x="16.5" y="3" width="4.5" height="4.5" rx="1" />
+                    <rect x="3" y="9.75" width="4.5" height="4.5" rx="1" />
+                    <rect x="9.75" y="9.75" width="4.5" height="4.5" rx="1" />
+                    <rect x="16.5" y="9.75" width="4.5" height="4.5" rx="1" />
+                    <rect x="3" y="16.5" width="4.5" height="4.5" rx="1" />
+                    <rect x="9.75" y="16.5" width="4.5" height="4.5" rx="1" />
+                    <rect x="16.5" y="16.5" width="4.5" height="4.5" rx="1" />
+                  </svg>
+                </div>
+                <ArrowUpRight className="w-4 h-4 text-slate-400 group-hover:text-slate-700 transition-colors" />
               </div>
+
+              <p className="text-[10px] font-mono tracking-[0.2em] text-[#8C98A4] uppercase font-semibold mt-7 mb-2">
+                MEASURE · SUPPORT · PLACE
+              </p>
+              <h2
+                className="text-2xl font-bold text-slate-900 mb-2"
+                style={{ fontFamily: "'Newsreader', Georgia, 'Times New Roman', serif" }}
+              >
+                Institution
+              </h2>
+              <p className="text-xs sm:text-[13px] text-slate-500 leading-relaxed min-h-[44px]">
+                Turn student skill and placement signals into better outcomes.
+              </p>
+            </div>
+
+            <div className="mt-8 pt-2 flex items-center text-xs font-semibold text-[#0F5132] group-hover:underline">
+              <span>Enter as an institution</span>
+              <span className="ml-1 text-sm font-sans">→</span>
             </div>
           </div>
         </div>
 
-        {/* DEMO ACCOUNTS QUICK-ACCESS BAR */}
-        <div className="mt-12 bg-slate-900/60 backdrop-blur-md rounded-2xl p-4 sm:p-5 border border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs">
-          <div className="flex items-center space-x-2 text-slate-400">
-            <Sparkles className="w-4 h-4 text-amber-400 flex-shrink-0" />
-            <span className="font-semibold text-slate-300">Quick Test Credentials (password: password123):</span>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-2">
+        {/* QUICK TEST DEMO LOGINS BAR */}
+        <div className="mt-8 pt-4 border-t border-slate-200/50 flex flex-wrap items-center justify-between gap-3 text-xs">
+          <span className="text-[11px] font-mono text-slate-400">Quick Test Logins (password: password123):</span>
+          <div className="flex items-center gap-2">
             <button
               onClick={() => {
                 setSelectedPortal("student");
                 setUsername("student@demo.com");
                 setPassword("password123");
               }}
-              className="px-3 py-1.5 rounded-xl bg-purple-500/15 hover:bg-purple-500/25 text-purple-300 border border-purple-500/30 transition-colors font-medium"
+              className="px-2.5 py-1 rounded-md bg-[#E8F5E9] hover:bg-[#D4EDDA] text-[#1B5E20] text-[11px] font-medium transition-colors cursor-pointer"
             >
               🎓 Student (student@demo.com)
             </button>
@@ -926,15 +922,15 @@ function LoginContent() {
               onClick={() => {
                 setSelectedPortal("institute");
               }}
-              className="px-3 py-1.5 rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 border border-emerald-500/30 transition-colors font-medium"
+              className="px-2.5 py-1 rounded-md bg-[#E8F5E9] hover:bg-[#D4EDDA] text-[#1B5E20] text-[11px] font-medium transition-colors cursor-pointer"
             >
-              🏛️ Institute (institute@demo.com)
+              🏛️ Institution (institute@demo.com)
             </button>
             <button
               onClick={() => {
                 setSelectedPortal("company");
               }}
-              className="px-3 py-1.5 rounded-xl bg-blue-500/15 hover:bg-blue-500/25 text-blue-300 border border-blue-500/30 transition-colors font-medium"
+              className="px-2.5 py-1 rounded-md bg-[#EBF3FE] hover:bg-[#D9E7FD] text-[#1A73E8] text-[11px] font-medium transition-colors cursor-pointer"
             >
               🏢 Company (company@demo.com)
             </button>
@@ -942,16 +938,10 @@ function LoginContent() {
         </div>
       </main>
 
-      {/* FOOTER */}
-      <footer className="relative z-20 max-w-6xl w-full mx-auto pt-6 border-t border-slate-800/60 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-slate-500">
-        <p>© 2026 Unified Education Platform. All portals interconnected.</p>
-        <div className="flex items-center space-x-4">
-          <span>Privacy Policy</span>
-          <span>•</span>
-          <span>Terms of Service</span>
-          <span>•</span>
-          <span>Support</span>
-        </div>
+      {/* BOTTOM FOOTER */}
+      <footer className="max-w-5xl w-full mx-auto pt-6 border-t border-slate-200/70 flex flex-col sm:flex-row items-center justify-between gap-3 text-[11px] font-mono text-[#8C98A4]">
+        <p>One connected ecosystem · Skills, opportunity and impact in one place</p>
+        <p>Secure · Role-based · Built for collaboration</p>
       </footer>
     </div>
   );
@@ -959,14 +949,20 @@ function LoginContent() {
 
 export default function LoginPage() {
   return (
-    <Suspense
-      fallback={
-        <div className="min-h-screen w-full bg-[#0d111c] flex items-center justify-center text-white">
-          <Loader2 className="w-8 h-8 animate-spin text-purple-500" />
-        </div>
-      }
-    >
-      <LoginContent />
-    </Suspense>
+    <>
+      <link
+        rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600;6..72,700&display=swap"
+      />
+      <Suspense
+        fallback={
+          <div className="min-h-screen w-full bg-[#FAFAF7] flex items-center justify-center text-slate-600">
+            <Loader2 className="w-8 h-8 animate-spin text-[#0F5132]" />
+          </div>
+        }
+      >
+        <LoginContent />
+      </Suspense>
+    </>
   );
 }

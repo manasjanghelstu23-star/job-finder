@@ -6,13 +6,15 @@ export async function GET(req: NextRequest) {
   // 1. Verify authentication and require STUDENT role
   const auth = await verifyAuth(req, ["STUDENT"]);
 
-  if (auth.error) {
-    return NextResponse.json({ error: auth.error }, { status: auth.status });
+  if (auth.error || !auth.user) {
+    return NextResponse.json({ error: auth.error || "Unauthorized" }, { status: auth.status || 401 });
   }
+
+  const authUser = auth.user;
 
   try {
     const student = await prisma.studentProfile.findUnique({
-      where: { userId: auth.user.id },
+      where: { userId: authUser.id },
       include: {
         skillScores: {
           include: { skill: true },
@@ -81,38 +83,52 @@ export async function GET(req: NextRequest) {
       },
     ];
 
-    const recommendedOpportunities = [
-      {
-        id: "o1",
-        title: "Frontend Engineer Intern",
-        company: "Stripe Partner Labs",
-        location: "Bangalore (Hybrid)",
-        stipend: "₹45,000/mo",
-        matchPercentage: 92,
-      },
-      {
-        id: "o2",
-        title: "Full Stack Developer",
-        company: "Vercel Ecosystem",
-        location: "Remote",
-        stipend: "₹60,000/mo",
-        matchPercentage: 86,
-      },
-      {
-        id: "o3",
-        title: "Backend Platform Engineer",
-        company: "Razorpay Innovation",
-        location: "Bangalore",
-        stipend: "₹50,000/mo",
-        matchPercentage: 81,
-      },
-    ];
+    const liveJobs = await prisma.jobPosting.findMany({
+      where: { status: "OPEN" },
+      orderBy: { postedAt: "desc" },
+      take: 6,
+      include: {
+        skills: {
+          include: { skill: true }
+        }
+      }
+    });
+
+    const recommendedOpportunities = liveJobs.length > 0
+      ? liveJobs.map((j, idx) => ({
+          id: j.id,
+          title: j.title,
+          company: j.company,
+          location: j.location || "Bangalore (Hybrid)",
+          stipend: j.salary || "₹45,000/mo",
+          matchPercentage: Math.max(75, 96 - idx * 3),
+          workMode: j.workMode || "Hybrid",
+          department: j.department || "Engineering",
+          skills: j.skills.map((s) => s.skill.name),
+          isNew: true,
+          postedAt: j.postedAt
+        }))
+      : [
+          {
+            id: "o1",
+            title: "Frontend Engineer Intern",
+            company: "Google Enterprise Partner",
+            location: "Bangalore (Hybrid)",
+            stipend: "₹50,000/mo",
+            matchPercentage: 96,
+            workMode: "Hybrid",
+            department: "Enterprise AI & Cloud",
+            skills: ["React", "TypeScript", "Next.js"],
+            isNew: true,
+            postedAt: new Date()
+          }
+        ];
 
     const recentApplications = student?.internshipApplications?.map((app) => ({
       id: app.id,
       role: app.job?.title || "Software Engineering Intern",
       company: app.job?.company || "TechCorp",
-      status: app.status || "Under Review",
+      status: (app as any).currentStatus || (app as any).status || "Under Review",
       appliedAt: app.appliedAt,
     })) || [
 
@@ -139,10 +155,10 @@ export async function GET(req: NextRequest) {
       recentApplications,
       notifications,
       user: {
-        id: auth.user.id,
-        email: auth.user.email,
-        name: auth.user.name,
-        role: auth.user.role,
+        id: authUser.id,
+        email: authUser.email,
+        name: authUser.name,
+        role: authUser.role,
         college: student?.user.profile?.college || "Institute of Technology",
         targetRole: student?.targetRole || "Software Engineer",
       },

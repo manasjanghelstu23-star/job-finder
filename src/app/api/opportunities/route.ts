@@ -260,6 +260,7 @@ export async function GET(request: Request) {
 
     jobs = await prisma.jobPosting.findMany({
       where: { status: "OPEN" },
+      orderBy: { postedAt: "desc" },
       include: {
         skills: {
           include: { skill: true }
@@ -412,6 +413,27 @@ export async function GET(request: Request) {
           salary: job.salary,
           source: job.source,
           postedAt: job.postedAt,
+          department: job.department,
+          workMode: job.workMode,
+          responsibilities: job.responsibilities,
+          projectTitle: job.projectTitle,
+          problemStatement: job.problemStatement,
+          deliverables: job.deliverables,
+          learningOutcomes: job.learningOutcomes,
+          evaluationMethod: job.evaluationMethod,
+          eligibleDegrees: job.eligibleDegrees,
+          eligibleBranches: job.eligibleBranches,
+          graduationYears: job.graduationYears,
+          minCgpa: job.minCgpa,
+          startDate: job.startDate,
+          endDate: job.endDate,
+          durationWeeks: job.durationWeeks,
+          workingHours: job.workingHours,
+          mentorName: job.mentorName,
+          mentorDesignation: job.mentorDesignation,
+          mentorDepartment: job.mentorDepartment,
+          mentorContact: job.mentorContact,
+          companyId: job.companyId,
           requiredSkills: requiredSkillsList.map(s => s.name),
           detailedSkillRequirements: requiredSkillsList
         },
@@ -428,7 +450,13 @@ export async function GET(request: Request) {
       };
     });
 
-    matchedOpportunities.sort((a, b) => b.matchResult.matchScore - a.matchResult.matchScore);
+    matchedOpportunities.sort((a, b) => {
+      // Prioritize high matchScore, then newly posted jobs
+      if (b.matchResult.matchScore !== a.matchResult.matchScore) {
+        return b.matchResult.matchScore - a.matchResult.matchScore;
+      }
+      return new Date(b.job.postedAt).getTime() - new Date(a.job.postedAt).getTime();
+    });
 
     return NextResponse.json(matchedOpportunities);
 
