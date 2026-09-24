@@ -1,9 +1,6 @@
 import { NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
+import { updateApplicationStatus } from "@/lib/mock-db";
 
-const prisma = new PrismaClient();
-
-// PATCH /api/internships/applications/[id]/status - Recruiter/Admin updates status
 export async function PATCH(request: Request, context: any) {
   try {
     const { id: applicationId } = await context.params;
@@ -14,25 +11,11 @@ export async function PATCH(request: Request, context: any) {
       return NextResponse.json({ error: "Invalid status" }, { status: 400 });
     }
 
-    const application = await prisma.internshipApplication.update({
-      where: { id: applicationId },
-      data: {
-        currentStatus: status,
-        updatedAt: new Date(),
-        statusHistory: {
-          create: {
-            status,
-            changedBy: changedBy || "Recruiter",
-            remarks: remarks || `Application moved to ${status}.`
-          }
-        }
-      },
-      include: {
-        statusHistory: {
-          orderBy: { changedAt: "desc" }
-        }
-      }
-    });
+    const application = updateApplicationStatus(applicationId, status, remarks, changedBy || "Recruiter");
+
+    if (!application) {
+      return NextResponse.json({ error: "Application not found" }, { status: 404 });
+    }
 
     return NextResponse.json({
       success: true,

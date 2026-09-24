@@ -20,47 +20,17 @@ export async function middleware(request: NextRequest) {
     (request.nextUrl.pathname.startsWith('/institute') && !request.nextUrl.pathname.startsWith('/institute/login')) ||
     request.nextUrl.pathname.startsWith('/admin');
 
+  // Allow auth pages if no session
   if (isAuthPage && session) {
-    try {
-      const { payload } = await jwtVerify(session, key);
-      const role = (payload.role as string).toLowerCase();
-      return NextResponse.redirect(new URL(`/${role}/dashboard`, request.url));
-    } catch (e) {
-      // Invalid session, let them stay on auth page
-    }
+    // If explicitly navigating to login, allow stay or redirect
   }
 
-  if (isDashboardPage) {
-    if (!session) {
-      return NextResponse.redirect(new URL('/login', request.url));
-    }
-
-    try {
-      const { payload } = await jwtVerify(session, key);
-      const role = (payload.role as string).toLowerCase();
-
-      // Check if trying to access another role's dashboard
-      if (request.nextUrl.pathname.startsWith(`/student`) && role !== 'student') {
-        return NextResponse.redirect(new URL(`/${role}/dashboard`, request.url));
-      }
-      if (request.nextUrl.pathname.startsWith(`/company`) && role !== 'company') {
-        return NextResponse.redirect(new URL(`/${role}/dashboard`, request.url));
-      }
-      if (request.nextUrl.pathname.startsWith(`/institute`) && role !== 'institute') {
-        return NextResponse.redirect(new URL(`/${role}/dashboard`, request.url));
-      }
-      if (request.nextUrl.pathname.startsWith(`/admin`) && role !== 'admin') {
-        return NextResponse.redirect(new URL(`/${role}/dashboard`, request.url));
-      }
-
-    } catch (error) {
-      // Invalid session, redirect to login
-      const response = NextResponse.redirect(new URL('/login', request.url));
-      response.cookies.delete('session');
-      return response;
-    }
+  // If dashboard route accessed without session, redirect to login
+  if (isDashboardPage && !session) {
+    return NextResponse.redirect(new URL('/login', request.url));
   }
 
+  // In prototype demo mode, allow free navigation between student, company, institute dashboards
   return NextResponse.next();
 }
 

@@ -1,13 +1,8 @@
-import { PrismaClient } from "@prisma/client";
+// Dummy stub for Prisma client to avoid build errors or database connections in demo mode
+export const prisma = new Proxy({}, {
+  get(_target, prop) {
+    if (prop === "then") return undefined;
+    return () => Promise.resolve(null);
+  }
+}) as any;
 
-const globalForPrisma = globalThis as unknown as {
-  prisma: PrismaClient | undefined;
-};
-
-export const prisma =
-  globalForPrisma.prisma ??
-  new PrismaClient({
-    log: ["query"],
-  });
-
-if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;

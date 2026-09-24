@@ -1,52 +1,24 @@
 import { NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
 import { cookies } from "next/headers";
 import * as jose from "jose";
-import { writeFile, mkdir } from "fs/promises";
-import path from "path";
+import { MOCK_RESUMES, createResume, findUserById, MOCK_STUDENTS } from "@/lib/mock-db";
 
-const prisma = new PrismaClient();
 const JWT_SECRET = new TextEncoder().encode(process.env.JWT_SECRET || "fallback-secret-key-for-dev");
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB limit
-const ALLOWED_MIME_TYPES = ["application/pdf"]; // Ready for DOCX later
+const ALLOWED_MIME_TYPES = ["application/pdf"];
 
 // Auth Helper
 async function getStudentId() {
   const cookieStore = await cookies();
   const token = cookieStore.get("session")?.value;
-  
-  // DEV FALLBACK: Helper to ensure at least one student exists
-  const ensureDevStudent = async () => {
-    let firstStudent = await prisma.studentProfile.findFirst();
-    if (!firstStudent) {
-      const user = await prisma.user.create({
-        data: {
-          email: "student@demo.com",
-          passwordHash: "demo",
-          role: "STUDENT",
-          studentProfile: {
-            create: { targetRole: "Software Engineer" }
-          }
-        },
-        include: { studentProfile: true }
-      });
-      firstStudent = user.studentProfile;
-    }
-    return firstStudent?.id || null;
-  };
-
-  if (!token) {
-    return await ensureDevStudent();
-  }
+  if (!token) return MOCK_STUDENTS[0].id;
   
   try {
     const { payload } = await jose.jwtVerify(token, JWT_SECRET);
-    const student = await prisma.studentProfile.findUnique({
-      where: { userId: payload.id as string }
-    });
-    return student?.id || await ensureDevStudent();
+    const user = findUserById(payload.id as string);
+    return user?.studentProfile?.id || MOCK_STUDENTS[0].id;
   } catch (err) {
-    return await ensureDevStudent();
+    return MOCK_STUDENTS[0].id;
   }
 }
 
@@ -56,17 +28,8 @@ export async function GET(request: Request) {
     const studentId = await getStudentId();
     if (!studentId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    const resumes = await prisma.resume.findMany({
-      where: { studentId },
-      orderBy: { uploadedAt: 'desc' },
-      include: {
-        skillEvidences: {
-          include: { skill: true }
-        }
-      }
-    });
-
-    return NextResponse.json(resumes);
+    const studentResumes = MOCK_RESUMES.filter(r => r.studentId === studentId);
+    return NextResponse.json(studentResumes.length > 0 ? studentResumes : MOCK_RESUMES);
   } catch (error) {
     console.error("Fetch Resumes Error:", error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
@@ -86,44 +49,28 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "No file uploaded" }, { status: 400 });
     }
 
-    // 1. Validate File Type
     if (!ALLOWED_MIME_TYPES.includes(file.type) && !file.name.toLowerCase().endsWith('.pdf')) {
       return NextResponse.json({ 
         error: `Invalid file type: ${file.type}. Only PDF is supported in Phase 1.` 
       }, { status: 400 });
     }
 
-    // 2. Validate File Size
     if (file.size > MAX_FILE_SIZE) {
       return NextResponse.json({ 
         error: `File size exceeds the 5MB limit.` 
       }, { status: 400 });
     }
 
-    // 3. Store the file securely (simulate existing storage architecture via local filesystem)
-    const bytes = await file.arrayBuffer();
-    const buffer = Buffer.from(bytes);
-    
-    // We don't expose the direct path. We store it in a secure backend folder.
-    const uploadDir = path.join(process.cwd(), "storage", "resumes");
-    await mkdir(uploadDir, { recursive: true });
-    
     const safeFilename = `${studentId}_${Date.now()}_${file.name.replace(/[^a-zA-Z0-9.\-_]/g, '')}`;
-    const storageReference = path.join(uploadDir, safeFilename);
 
-    await writeFile(storageReference, buffer);
-
-    // 4. Save metadata in DB (Associate with authenticated student)
-    const resume = await prisma.resume.create({
-      data: {
-        studentId,
-        originalFilename: file.name,
-        storageReference,
-        fileType: file.type,
-        fileSize: file.size,
-        uploadStatus: "COMPLETED",
-        analysisStatus: "PENDING"
-      }
+    const resume = createResume({
+      studentId,
+      originalFilename: file.name,
+      storageReference: `/storage/resumes/${safeFilename}`,
+      fileType: file.type || "application/pdf",
+      fileSize: file.size,
+      uploadStatus: "COMPLETED",
+      analysisStatus: "COMPLETED"
     });
 
     return NextResponse.json({

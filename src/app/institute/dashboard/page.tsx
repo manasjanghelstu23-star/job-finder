@@ -44,6 +44,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
+import { CampusBridgeLogo } from "../../login/page";
 
 // Primary Section Navigation Definition (14 sections exact matching prompt)
 type SectionType =
@@ -249,33 +250,25 @@ function InstituteDashboardContent() {
   const metrics = overviewData?.metrics;
 
   return (
-    <div className="flex h-screen bg-slate-50 text-slate-900 overflow-hidden font-sans">
+    <div className="flex h-screen bg-[#f4f6f5] text-[#14231E] overflow-hidden font-sans">
       
       {/* ======================================================================= */}
       {/* 1. LEFT SIDEBAR                                                         */}
       {/* ======================================================================= */}
-      <aside className="w-72 bg-slate-950 text-white flex flex-col border-r border-slate-800 shrink-0 select-none">
+      <aside className="w-72 bg-white text-[#14231E] flex flex-col border-r border-slate-200/80 shrink-0 select-none">
         
         {/* Brand Header */}
-        <div className="p-6 border-b border-slate-800/80">
+        <div className="p-5 border-b border-slate-200/80">
           <div className="flex items-center space-x-3">
-            <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-indigo-600 via-blue-600 to-emerald-400 flex items-center justify-center font-black text-xl text-white shadow-md shadow-indigo-950/50">
-              {inst?.code?.slice(0, 2) || "IT"}
-            </div>
-            <div className="overflow-hidden">
-              <h2 className="text-base font-black tracking-tight text-white truncate">
-                {inst?.name?.split(" ")[0] || "IITE"} Campus
-              </h2>
-              <div className="flex items-center space-x-1 text-[11px] text-emerald-400 font-bold">
-                <ShieldCheck className="w-3.5 h-3.5 shrink-0" />
-                <span className="truncate">{inst?.naacGrade || "NAAC A++"}</span>
-              </div>
-            </div>
+            <CampusBridgeLogo className="w-7 h-7" />
           </div>
+          <p className="font-mono text-[10px] tracking-[0.2em] font-semibold text-slate-400 uppercase mt-4">
+            INSTITUTION WORKSPACE
+          </p>
         </div>
 
         {/* Navigation Items List */}
-        <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto custom-scrollbar">
+        <nav className="flex-1 px-3 py-3 space-y-1 overflow-y-auto">
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = activeSection === item.id;
@@ -284,23 +277,23 @@ function InstituteDashboardContent() {
               <div key={item.id} className="space-y-1">
                 <button
                   onClick={() => handleNavChange(item.id as SectionType)}
-                  className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                  className={`w-full flex items-center justify-between px-3.5 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
                     isActive
-                      ? "bg-indigo-600 text-white shadow-sm shadow-indigo-600/30"
-                      : "text-slate-300 hover:text-white hover:bg-slate-900"
+                      ? "bg-[#e8f5f1] text-[#13664d]"
+                      : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
                   }`}
                 >
                   <div className="flex items-center space-x-3">
-                    <Icon className={`w-4 h-4 ${isActive ? "text-white" : "text-slate-400"}`} />
+                    <Icon className={`w-4 h-4 ${isActive ? "text-[#13664d]" : "text-slate-400"}`} />
                     <span>{item.label}</span>
                   </div>
 
                   {item.badge && (
                     <span
-                      className={`text-[10px] font-extrabold px-2 py-0.5 rounded-full ${
+                      className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
                         isActive
-                          ? "bg-white/20 text-white"
-                          : "bg-slate-800 text-slate-300"
+                          ? "bg-[#13664d] text-white"
+                          : "bg-slate-100 text-slate-500"
                       }`}
                     >
                       {item.badge}
@@ -394,45 +387,74 @@ function InstituteDashboardContent() {
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         
         {/* Top Header Bar */}
-        <header className="h-16 bg-white border-b border-gray-200 px-8 flex items-center justify-between shrink-0">
+        <header className="h-16 bg-white border-b border-slate-200/80 px-6 flex items-center justify-between shrink-0">
           <div className="flex items-center space-x-4">
-            <div className="flex items-center space-x-2 text-xs font-bold text-gray-500">
-              <Building className="w-4 h-4 text-indigo-600" />
+            <div className="flex items-center space-x-2 text-xs font-semibold text-slate-500">
+              <Building className="w-4 h-4 text-[#13664d]" />
               <span>{inst?.name || "Indian Institute of Technology & Engineering"}</span>
               <span>/</span>
-              <span className="text-slate-900 font-extrabold capitalize">
+              <span className="text-[#14231E] font-bold capitalize">
                 {activeSection.replace("_", " ")}
               </span>
             </div>
           </div>
 
+          {/* Center: Preview Role Switcher */}
+          <div className="hidden lg:flex items-center space-x-2 bg-slate-100/80 p-1 rounded-full text-xs font-medium">
+            <span className="text-slate-400 font-mono text-[11px] px-3">Preview as</span>
+            <Link
+              href="/student/dashboard"
+              className="px-3 py-1 rounded-full text-slate-600 hover:text-slate-900 transition-colors"
+            >
+              Student
+            </Link>
+            <Link
+              href="/company/dashboard"
+              className="px-3 py-1 rounded-full text-slate-600 hover:text-slate-900 transition-colors"
+            >
+              Company
+            </Link>
+            <Link
+              href="/institute/dashboard"
+              className="px-3 py-1 rounded-full bg-white text-[#13664d] font-semibold shadow-2xs"
+            >
+              Institution
+            </Link>
+            <Link
+              href="/institute/dashboard"
+              className="px-3 py-1 rounded-full text-slate-600 hover:text-slate-900 transition-colors"
+            >
+              Academician
+            </Link>
+          </div>
+
           <div className="flex items-center space-x-3">
-            <span className="text-[11px] font-bold text-emerald-800 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-xl flex items-center gap-1.5 shadow-2xs">
-              <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+            <span className="text-[11px] font-semibold text-[#13664d] bg-[#e8f5f1] border border-[#13664d]/20 px-3 py-1 rounded-xl flex items-center gap-1.5">
+              <ShieldCheck className="w-3.5 h-3.5 text-[#13664d]" />
               <span>NIRF Ranked #18 • Tier-1 Accredited</span>
             </span>
 
             <button
               onClick={() => handleNavChange("messages")}
-              className="p-2 rounded-xl text-gray-500 hover:text-slate-900 hover:bg-gray-100 transition-colors relative cursor-pointer"
+              className="p-2 rounded-xl text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors relative cursor-pointer"
             >
               <Mail className="w-4 h-4" />
-              <span className="absolute top-1 right-1 w-2 h-2 bg-indigo-600 rounded-full" />
+              <span className="absolute top-1 right-1 w-2 h-2 bg-[#13664d] rounded-full" />
             </button>
           </div>
         </header>
 
         {/* Scrollable Work Area */}
-        <main className="flex-1 overflow-y-auto p-8 space-y-8">
+        <main className="flex-1 overflow-y-auto p-6 sm:p-8 space-y-8">
           
           {/* Global Alert Notification */}
           {applySuccessNotice && (
-            <div className="bg-emerald-50 border border-emerald-300 text-emerald-900 px-5 py-3.5 rounded-2xl text-xs font-bold flex items-center justify-between shadow-xs animate-in fade-in">
+            <div className="bg-[#e8f5f1] border border-[#13664d]/30 text-[#13664d] px-5 py-3.5 rounded-2xl text-xs font-semibold flex items-center justify-between shadow-2xs">
               <div className="flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                <CheckCircle2 className="w-4 h-4 text-[#13664d] shrink-0" />
                 <span>{applySuccessNotice}</span>
               </div>
-              <button onClick={() => setApplySuccessNotice(null)} className="text-emerald-700 hover:text-emerald-900">
+              <button onClick={() => setApplySuccessNotice(null)} className="text-[#13664d] hover:text-black">
                 <X className="w-4 h-4" />
               </button>
             </div>
@@ -445,16 +467,18 @@ function InstituteDashboardContent() {
             <div className="space-y-8">
               
               {/* Executive Top Banner */}
-              <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 rounded-3xl p-8 text-white shadow-md flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-                <div>
-                  <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-emerald-400 mb-2">
+              <div className="bg-[#13664d] rounded-3xl p-8 text-white shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-6 relative overflow-hidden">
+                <div className="absolute -bottom-16 -right-16 w-80 h-80 rounded-full border border-white/10 pointer-events-none" />
+
+                <div className="relative z-10">
+                  <div className="flex items-center gap-2 text-xs font-mono font-semibold uppercase tracking-wider text-[#a7f3d0] mb-2">
                     <ShieldCheck className="w-4 h-4" />
                     <span>Autonomous Institutional Authority Hub</span>
                   </div>
-                  <h1 className="text-3xl font-black text-white">
+                  <h1 className="font-serif text-3xl font-normal text-white tracking-tight">
                     {inst?.name || "Indian Institute of Technology & Engineering (IITE)"}
                   </h1>
-                  <p className="text-xs text-slate-300 mt-1 max-w-2xl leading-relaxed">
+                  <p className="text-xs text-emerald-100/90 font-light mt-1 max-w-2xl leading-relaxed">
                     Centrally managing student placement readiness, verified skill credentials, corporate hiring pipelines, and faculty industrial sabbatical tracks.
                   </p>
                 </div>

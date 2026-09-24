@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { findUserByEmail, createUser } from "@/lib/mock-db";
 import bcrypt from "bcryptjs";
 import { encrypt } from "@/lib/auth";
 import { cookies } from "next/headers";
@@ -30,7 +30,7 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
     if (portal === "institute") role = "INSTITUTE";
     if (portal === "company") role = "COMPANY";
 
-    // Standardized OAuth identity for demonstration & production integration
+    // Standardized OAuth identity for demonstration
     const oauthEmail = `${portal}.${normalizedProvider}@example.com`;
     const providerDisplay =
       normalizedProvider === "twitter"
@@ -40,59 +40,23 @@ export async function POST(req: NextRequest, { params }: RouteParams) {
         : normalizedProvider.charAt(0).toUpperCase() + normalizedProvider.slice(1);
     const fullName = `${providerDisplay} Verified ${role.charAt(0) + role.slice(1).toLowerCase()}`;
 
-    // Find or create the user in the database
-    let user = await prisma.user.findUnique({
-      where: { email: oauthEmail },
-      include: { profile: true },
-    });
+    // Find or create the user in mock db
+    let user = await findUserByEmail(oauthEmail);
 
     if (!user) {
       const passwordHash = await bcrypt.hash(`oauth-${normalizedProvider}-${Date.now()}`, 10);
-      user = await prisma.user.create({
-        data: {
-          email: oauthEmail,
-          passwordHash,
-          role,
-          isVerified: true,
-          status: "ACTIVE",
-          profile: {
-            create: {
-              fullName,
-              email: oauthEmail,
-              role,
-            },
-          },
-          ...(role === "STUDENT"
-            ? {
-                studentProfile: {
-                  create: {
-                    targetRole: "Full Stack Developer",
-                  },
-                },
-              }
-            : {}),
-          ...(role === "INSTITUTE"
-            ? {
-                institutionProfile: {
-                  create: {
-                    institutionName: `${providerDisplay} Academic Partner`,
-                  },
-                },
-              }
-            : {}),
-          ...(role === "COMPANY"
-            ? {
-                companyProfile: {
-                  create: {
-                    companyName: `${providerDisplay} Enterprise Partner`,
-                    verificationStatus: "VERIFIED",
-                  },
-                },
-              }
-            : {}),
-        },
-        include: { profile: true },
+      user = await createUser({
+        email: oauthEmail,
+        passwordHash,
+        role,
+        fullName,
+        companyName: role === "COMPANY" ? `${providerDisplay} Enterprise Partner` : undefined,
+        institutionName: role === "INSTITUTE" ? `${providerDisplay} Academic Partner` : undefined,
       });
+    }
+
+    if (!user) {
+      return NextResponse.json({ error: "User generation failed" }, { status: 500 });
     }
 
     // Generate JWT Session Token

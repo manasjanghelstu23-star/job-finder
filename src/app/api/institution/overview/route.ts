@@ -1,53 +1,16 @@
 import { NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
+import { MOCK_USERS } from "@/lib/mock-db";
 
 export async function GET() {
   try {
     const session = await getSession();
 
-    // Fetch demo or authenticated institution profile
-    let institution = await prisma.institutionProfile.findFirst({
-      include: {
-        user: { select: { email: true } },
-        students: {
-          include: {
-            user: true,
-            skillScores: { include: { skill: true } }
-          }
-        }
-      }
-    });
-
-    if (!institution) {
-      const demoUser = await prisma.user.create({
-        data: {
-          email: "director@iite.ac.in",
-          passwordHash: "hashed",
-          role: "INSTITUTE",
-          isVerified: true,
-          institutionProfile: {
-            create: {
-              institutionName: "Indian Institute of Technology & Engineering (IITE)",
-              domain: "iite.ac.in"
-            }
-          }
-        },
-        include: { institutionProfile: true }
-      });
-      institution = await prisma.institutionProfile.findUnique({
-        where: { id: demoUser.institutionProfile!.id },
-        include: {
-          user: { select: { email: true } },
-          students: {
-            include: {
-              user: true,
-              skillScores: { include: { skill: true } }
-            }
-          }
-        }
-      });
-    }
+    const institution = {
+      id: "inst-1",
+      institutionName: "Indian Institute of Technology & Engineering (IITE)",
+      domain: "iite.ac.in"
+    };
 
     // High-level Institutional Metrics
     const metrics = {

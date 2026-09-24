@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyAuth } from "@/lib/api-guard";
-import { prisma } from "@/lib/prisma";
+import { findUserById } from "@/lib/mock-db";
 
 export async function GET(req: NextRequest) {
   const auth = await verifyAuth(req);
@@ -9,21 +9,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: auth.error || "Unauthorized", user: null }, { status: auth.status || 401 });
   }
 
-  const user = await prisma.user.findUnique({
-    where: { id: auth.user.id },
-    include: {
-      profile: true,
-      studentProfile: {
-        include: {
-          skillScores: {
-            include: { skill: true },
-          },
-        },
-      },
-      institutionProfile: true,
-      companyProfile: true,
-    },
-  });
+  const user = await findUserById(auth.user.id);
 
   if (!user) {
     return NextResponse.json({ error: "User not found", user: null }, { status: 404 });

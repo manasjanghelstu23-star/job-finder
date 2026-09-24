@@ -1,10 +1,7 @@
 import { NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
+import { createJob, getSkills } from "@/lib/mock-db";
 import { extractSkillsFromText } from "@/lib/skillExtractor";
 
-const prisma = new PrismaClient();
-
-// Mock External API Response (Phase 2 - External Sources)
 const mockExternalJobsAPI = [
   {
     external_id: "EXT-001",
@@ -30,58 +27,32 @@ const mockExternalJobsAPI = [
 
 export async function POST(request: Request) {
   try {
-    // 1. Fetch Master Skills Taxonomy (Phase 6)
-    const masterSkills = await prisma.skill.findMany();
-
+    const masterSkills = await getSkills();
     const ingestedJobs = [];
 
-    // 2. Process Job Feed
     for (const extJob of mockExternalJobsAPI) {
-      
-      // Phase 4: Job Normalization
-      // Convert external schema to our canonical JobPosting schema
       const normalizedJob = {
         title: extJob.job_title,
         company: extJob.company_name,
         description: extJob.full_description,
         location: extJob.city,
-        experience: "Not Specified", // fallback
+        experience: "0-1 Years",
         employmentType: extJob.type,
         salary: extJob.salary_band,
         source: "EXTERNAL_API",
         externalUrl: extJob.url,
       };
 
-      // Deduplication check: Do we already have this external job?
-      const existingJob = await prisma.jobPosting.findFirst({
-        where: { externalUrl: normalizedJob.externalUrl }
-      });
+      const extractedSkills = extractSkillsFromText(normalizedJob.description, masterSkills as any[]);
 
-      if (existingJob) {
-        continue; // Skip if already ingested
-      }
-
-      // Phase 5: Skill Extraction
-      const extractedSkills = extractSkillsFromText(normalizedJob.description, masterSkills);
-
-      // Phase 3 & 7: Store the Job and Map exactly to Skill IDs
-      const newJob = await prisma.jobPosting.create({
-        data: {
-          ...normalizedJob,
-          skills: {
-            create: extractedSkills.map(s => ({
-              skillId: s.skillId,
-              requirementType: s.requirementType,
-              requiredLevel: s.requirementType === "REQUIRED" ? 70 : 50, // default baselines
-              weight: s.requirementType === "REQUIRED" ? 1.0 : 0.5
-            }))
-          }
-        },
-        include: {
-          skills: {
-            include: { skill: true }
-          }
-        }
+      const newJob = await createJob({
+        ...normalizedJob,
+        skills: extractedSkills.map(s => ({
+          skillId: s.skillId,
+          requirementType: s.requirementType,
+          weight: s.requirementType === "REQUIRED" ? 1.0 : 0.5,
+          skill: { id: s.skillId, name: s.skillName }
+        })) as any
       });
 
       ingestedJobs.push(newJob);

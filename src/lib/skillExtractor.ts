@@ -1,15 +1,17 @@
-import { Skill } from "@prisma/client";
+export interface SkillItem {
+  id: string;
+  name: string;
+  categoryId?: string;
+}
 
 /**
  * Phase 5: Skill Extraction Layer
  * Uses deterministic keyword matching against the Master Skill Taxonomy.
  */
-export function extractSkillsFromText(text: string, masterSkills: Skill[]) {
-  const extractedSkills: Array<{ skillId: string; requirementType: "REQUIRED" | "PREFERRED" }> = [];
+export function extractSkillsFromText(text: string, masterSkills: SkillItem[]) {
+  const extractedSkills: Array<{ skillId: string; skillName: string; requirementType: "REQUIRED" | "PREFERRED" }> = [];
   const normalizedText = text.toLowerCase();
-  
-  // Very basic heuristic to detect "Preferred" section
-  // Real world: NLP/LLM or advanced regex would handle this
+
   const preferredIndex = Math.max(
     normalizedText.indexOf("preferred"),
     normalizedText.indexOf("bonus"),
@@ -17,13 +19,10 @@ export function extractSkillsFromText(text: string, masterSkills: Skill[]) {
   );
 
   masterSkills.forEach(skill => {
-    // Escape regex characters in skill name
     const escapedName = skill.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    // Word boundary regex to avoid partial matches (e.g. 'C' matching 'React')
-    // Note: C++, C#, .NET require careful boundary handling
     let regexStr = `\\b${escapedName}\\b`;
     if (skill.name === "C++" || skill.name === "C#") {
-      regexStr = `\\b${escapedName}`; // boundary after symbols is tricky
+      regexStr = `\\b${escapedName}`;
     }
 
     const regex = new RegExp(regexStr, "i");
@@ -33,13 +32,13 @@ export function extractSkillsFromText(text: string, masterSkills: Skill[]) {
       const matchIndex = match.index || 0;
       let requirementType: "REQUIRED" | "PREFERRED" = "REQUIRED";
 
-      // If the skill is found after the "Preferred" keywords, mark as preferred
       if (preferredIndex !== -1 && matchIndex > preferredIndex) {
         requirementType = "PREFERRED";
       }
 
       extractedSkills.push({
         skillId: skill.id,
+        skillName: skill.name,
         requirementType
       });
     }

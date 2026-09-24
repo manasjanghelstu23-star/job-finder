@@ -1,4 +1,20 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+## DEMO MODE & VERCEL DEPLOYMENT
+
+This application is configured for a **100% Database-Free Vercel Demo Deployment**.
+
+### Key Characteristics:
+- **File-Based Mock Data:** All data (users, jobs, applications, internships, assessments, skills, communities, resumes) is loaded in-memory from `src/data/` and managed via `src/lib/mock-db.ts`.
+- **Zero Database Requirement:** No PostgreSQL or `DATABASE_URL` is required for runtime or building.
+- **Simulated OAuth Authentication:** Clicking Google, LinkedIn, Facebook, or Twitter/X login buttons automatically authenticates demo accounts with valid sessions.
+- **Serverless Ephemerality:** Mutations (applying for jobs, posting internships, updating tasks, sending community messages) update in-memory state during active serverless container lifecycles.
+
+### Available Demo Accounts:
+| Role | Email | Login Method |
+| --- | --- | --- |
+| **Student** | `student.google@example.com` / `student@demo.com` | Google OAuth or Demo Login |
+| **Company Recruiter** | `company.google@example.com` / `company@demo.com` | Google OAuth or Demo Login |
+| **Institute Director** | `institute.google@example.com` / `director@iite.ac.in` | Google OAuth or Demo Login |
+| **System Admin** | `admin@demo.com` | Demo Login |
 
 ## Getting Started
 
@@ -6,31 +22,14 @@ First, run the development server:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Open [http://localhost:3000](http://localhost:3000) with your browser.
 
 ## Deploy on Vercel
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```bash
+npm run build
+```
+Deploy directly to Vercel without configuring environment variables or database connections.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.

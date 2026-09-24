@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
 
 // In-memory store for newly added employees
 let customEmployees: any[] = [];

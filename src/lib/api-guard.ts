@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { jwtVerify } from "jose";
-import { prisma } from "@/lib/prisma";
+import { findUserById } from "@/lib/mock-db";
 
 const secretKey = process.env.JWT_SECRET || "super-secret-key-change-me-in-production";
 const key = new TextEncoder().encode(secretKey);
@@ -40,16 +40,8 @@ export async function verifyAuth(req: NextRequest, allowedRoles?: string[]): Pro
     const email = payload.email as string;
     const role = (payload.role as string || "STUDENT").toUpperCase();
 
-    // Verify user still exists in database
-    const user = await prisma.user.findUnique({
-      where: { id: userId },
-      include: {
-        profile: true,
-        studentProfile: true,
-        institutionProfile: true,
-        companyProfile: true,
-      },
-    });
+    // Verify user exists in mock database
+    const user = await findUserById(userId);
 
     if (!user) {
       return { error: "Unauthorized: User not found", status: 401 };

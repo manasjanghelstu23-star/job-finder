@@ -1,55 +1,46 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { findUserByEmail, createUser } from "@/lib/mock-db";
 import bcrypt from "bcryptjs";
 import { encrypt } from "@/lib/auth";
 import { cookies } from "next/headers";
 
 export async function POST(req: NextRequest) {
   try {
-    const { email, password } = await req.json();
+    const { email, password, role: requestedRole } = await req.json();
 
-    if (!email || !password) {
-      return NextResponse.json({ error: "Please provide both email and password" }, { status: 400 });
+    const cleanEmail = email ? email.trim().toLowerCase() : "";
+    let role = (requestedRole || "STUDENT").toUpperCase();
+
+    if (cleanEmail.includes("company")) role = "COMPANY";
+    else if (cleanEmail.includes("institute") || cleanEmail.includes("academician")) role = "INSTITUTE";
+
+    let user = await findUserByEmail(cleanEmail);
+
+    // If demo user doesn't exist yet, auto-create one for demo purposes
+    if (!user) {
+      const passwordHash = await bcrypt.hash(password || "password123", 10);
+      user = await createUser({
+        email: cleanEmail || `${role.toLowerCase()}@demo.com`,
+        passwordHash,
+        role,
+        fullName: cleanEmail ? cleanEmail.split("@")[0].replace(/[^a-zA-Z0-9]/g, " ") : `${role} User`,
+      });
+    } else if (requestedRole && user.role !== role) {
+      user.role = role;
     }
-
-    const cleanEmail = email.trim().toLowerCase();
-
-    const user = await prisma.user.findUnique({
-      where: { email: cleanEmail },
-      include: {
-        profile: true,
-      },
-    });
 
     if (!user) {
-      return NextResponse.json({ error: "Invalid username or password" }, { status: 401 });
+      return NextResponse.json({ error: "Failed to authenticate user" }, { status: 400 });
     }
 
-    const isMatch = await bcrypt.compare(password, user.passwordHash);
-
-    if (!isMatch) {
-      return NextResponse.json({ error: "Invalid username or password" }, { status: 401 });
-    }
-
-    // Ensure Profile exists
-    let fullName = user.profile?.fullName;
-    if (!user.profile) {
-      const fallbackName = cleanEmail.split("@")[0].replace(/[^a-zA-Z0-9]/g, " ");
-      const profile = await prisma.profile.create({
-        data: {
-          userId: user.id,
-          email: user.email,
-          fullName: fallbackName.charAt(0).toUpperCase() + fallbackName.slice(1),
-          role: user.role,
-        },
-      });
-      fullName = profile.fullName;
-    }
+    const fullName = user.profile?.fullName || (user.email ? user.email.split("@")[0] : `${role} User`);
+    const userId = user.id || `user-${Date.now()}`;
+    const userEmail = user.email || `${role.toLowerCase()}@demo.com`;
 
     const token = await encrypt({
-      id: user.id,
-      email: user.email,
-      role: user.role,
+      id: userId,
+      email: userEmail,
+      role: role,
       name: fullName,
     });
 
@@ -66,12 +57,12 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       success: true,
       user: {
-        id: user.id,
-        email: user.email,
+        id: userId,
+        email: userEmail,
         name: fullName,
-        role: user.role,
+        role: role,
       },
-      role: user.role.toLowerCase(),
+      role: role.toLowerCase(),
       token,
     });
   } catch (error) {

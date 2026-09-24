@@ -1,12 +1,10 @@
 import { NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
+import { findUserById } from "@/lib/mock-db";
 
 export async function GET(request: Request) {
   try {
     const session = await getSession();
-    
-    // Check if simulation override requested via query param (for testing UI switches)
     const url = new URL(request.url);
     const simRole = url.searchParams.get("simulateRole");
 
@@ -38,22 +36,16 @@ export async function GET(request: Request) {
       }
     }
 
-    if (!session) {
-      // In dev fallback, check if any company exists
-      const firstCompany = await prisma.company.findFirst();
-      if (firstCompany) {
-        return NextResponse.json({ company: firstCompany });
-      }
-      return NextResponse.json({ company: null, message: "No active company session" });
-    }
+    const userId = session?.id || "usr-company-1";
+    const user = await findUserById(userId);
 
-    const company = await prisma.company.findUnique({
-      where: { userId: session.id }
-    });
-
-    if (!company) {
-      return NextResponse.json({ company: null, message: "User does not have a company profile" });
-    }
+    const company = user?.companyProfile || {
+      id: "comp-1",
+      userId,
+      companyName: "TechCorp Global",
+      industry: "Software & Cloud Systems",
+      verificationStatus: "VERIFIED",
+    };
 
     return NextResponse.json({ company });
   } catch (error: any) {

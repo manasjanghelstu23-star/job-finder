@@ -1,33 +1,16 @@
 import { NextResponse } from "next/server";
-import { getSession } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
+import { updateApplicationStatus } from "@/lib/mock-db";
 
 export async function POST(request: Request) {
   try {
-    const session = await getSession();
-    const body = await request.json();
+    const body = await request.json().catch(() => ({}));
     const { applicationId, newStatus, remarks } = body;
 
     if (!applicationId || !newStatus) {
       return NextResponse.json({ error: "applicationId and newStatus are required" }, { status: 400 });
     }
 
-    const updatedApp = await prisma.internshipApplication.update({
-      where: { id: applicationId },
-      data: {
-        currentStatus: newStatus,
-        statusHistory: {
-          create: {
-            status: newStatus,
-            changedBy: "Recruiter (Company Portal)",
-            remarks: remarks || `Candidate status moved to ${newStatus}`
-          }
-        }
-      },
-      include: {
-        statusHistory: { orderBy: { changedAt: "desc" } }
-      }
-    });
+    const updatedApp = await updateApplicationStatus(applicationId, newStatus, remarks, "Recruiter (Company Portal)");
 
     return NextResponse.json({
       success: true,

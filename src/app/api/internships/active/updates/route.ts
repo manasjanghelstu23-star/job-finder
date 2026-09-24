@@ -1,10 +1,6 @@
 import { NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
+import { addWeeklyUpdate } from "@/lib/mock-db";
 
-const prisma = new PrismaClient();
-
-// POST /api/internships/active/updates
-// Payload: { internshipId: string, weekNumber: number, weekTitle: string, summary: string, submittedWorkUrl?: string, blockers?: string }
 export async function POST(request: Request) {
   try {
     const { internshipId, weekNumber, weekTitle, summary, submittedWorkUrl, blockers } = await request.json();
@@ -13,38 +9,21 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Internship ID and summary are required" }, { status: 400 });
     }
 
-    const newUpdate = await prisma.internshipWeeklyUpdate.create({
-      data: {
-        internshipId,
-        weekNumber: Number(weekNumber) || 1,
-        weekTitle: weekTitle || `Week ${weekNumber}: Progress Update`,
-        summary,
-        submittedWorkUrl: submittedWorkUrl || null,
-        blockers: blockers || null
-      }
+    const updatedInternship = addWeeklyUpdate(internshipId, {
+      weekNumber: Number(weekNumber) || 1,
+      weekTitle: weekTitle || `Week ${weekNumber}: Progress Update`,
+      summary,
+      submittedWorkUrl,
+      blockers
     });
 
-    const updatedInternship = await prisma.activeInternship.findUnique({
-      where: { id: internshipId },
-      include: {
-        milestones: {
-          include: { tasks: true },
-          orderBy: { orderIndex: "asc" }
-        },
-        weeklyUpdates: {
-          orderBy: { weekNumber: "desc" }
-        },
-        mentorFeedbacks: {
-          include: { skillEvaluations: true },
-          orderBy: { reviewDate: "desc" }
-        },
-        completionRecord: true
-      }
-    });
+    if (!updatedInternship) {
+      return NextResponse.json({ error: "Active internship not found" }, { status: 404 });
+    }
 
     return NextResponse.json({
       success: true,
-      update: newUpdate,
+      update: updatedInternship.weeklyUpdates[0],
       internship: updatedInternship
     });
   } catch (error: any) {

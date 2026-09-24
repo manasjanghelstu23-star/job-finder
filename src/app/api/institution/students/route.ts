@@ -1,22 +1,9 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
 
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const department = searchParams.get("department") || "ALL";
-
-    // Query real students from SQLite/Prisma with their verified skills and user accounts
-    const dbStudents = await prisma.studentProfile.findMany({
-      include: {
-        user: true,
-        skillScores: { include: { skill: true } },
-        internshipApplications: {
-          include: { job: true }
-        }
-      },
-      take: 50
-    });
 
     // Curated rich cohort representation matching engineering college directory
     const mockCohort = [

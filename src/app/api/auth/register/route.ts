@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { findUserByEmail, createUser } from "@/lib/mock-db";
 import bcrypt from "bcryptjs";
 import { encrypt } from "@/lib/auth";
 import { cookies } from "next/headers";
@@ -12,25 +12,24 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Missing fields" }, { status: 400 });
     }
 
-    const existingUser = await prisma.user.findUnique({
-      where: { email },
-    });
+    const cleanEmail = email.trim().toLowerCase();
+    const existingUser = await findUserByEmail(cleanEmail);
 
     if (existingUser) {
       return NextResponse.json({ error: "User already exists" }, { status: 400 });
     }
 
     const passwordHash = await bcrypt.hash(password, 10);
-
-    const user = await prisma.user.create({
-      data: {
-        email,
-        passwordHash,
-        role,
-      },
+    const user = await createUser({
+      email: cleanEmail,
+      passwordHash,
+      role: role.toUpperCase(),
     });
 
-    // Create session
+    if (!user) {
+      return NextResponse.json({ error: "Failed to create user" }, { status: 500 });
+    }
+
     const expires = new Date(Date.now() + 24 * 60 * 60 * 1000);
     const session = await encrypt({ id: user.id, email: user.email, role: user.role });
     const cookieStore = await cookies();

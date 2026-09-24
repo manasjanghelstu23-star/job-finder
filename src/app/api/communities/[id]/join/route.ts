@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { getCommunityById, joinCommunity } from "@/lib/mock-db";
 
 export async function POST(
   req: NextRequest,
@@ -8,12 +8,9 @@ export async function POST(
   try {
     const { id } = await params;
     const body = await req.json().catch(() => ({}));
-    const { join } = body; // true or false
+    const { join } = body;
 
-    const community = await prisma.community.findUnique({
-      where: { id },
-      include: { members: true },
-    });
+    const community = await getCommunityById(id);
 
     if (!community) {
       return NextResponse.json(
@@ -22,7 +19,10 @@ export async function POST(
       );
     }
 
-    // Return updated status
+    if (join !== false) {
+      await joinCommunity(id, "usr-student-1");
+    }
+
     return NextResponse.json({
       success: true,
       communityId: id,

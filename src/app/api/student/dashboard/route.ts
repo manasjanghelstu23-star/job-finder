@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyAuth } from "@/lib/api-guard";
-import { prisma } from "@/lib/prisma";
+import { findUserById, getJobs, getApplications } from "@/lib/mock-db";
 
 export async function GET(req: NextRequest) {
-  // 1. Verify authentication and require STUDENT role
   const auth = await verifyAuth(req, ["STUDENT"]);
 
   if (auth.error || !auth.user) {
@@ -13,33 +12,15 @@ export async function GET(req: NextRequest) {
   const authUser = auth.user;
 
   try {
-    const student = await prisma.studentProfile.findUnique({
-      where: { userId: authUser.id },
-      include: {
-        skillScores: {
-          include: { skill: true },
-        },
-        internshipApplications: {
-          include: {
-            job: true,
-          },
-          orderBy: { appliedAt: "desc" },
-          take: 5,
-        },
+    const userObj = findUserById(authUser.id);
+    const student = userObj?.studentProfile;
 
-        user: {
-          include: { profile: true },
-        },
-      },
-    });
-
-    // Compute live skills & stats
-    const skillsList = student?.skillScores?.map((ss) => ({
-      id: ss.skillId,
-      name: ss.skill.name,
+    const skillsList = (student as any)?.skillScores?.map((ss: any) => ({
+      id: ss.skillId || ss.skill?.id,
+      name: ss.skill?.name || "Skill",
       proficiency: Math.round(ss.score),
       source: "assessment",
-      verified: ss.verification === "Verified",
+      verified: ss.verification === "Verified" || ss.verification === "Internship Mentor Verified",
     })) || [
       { id: "1", name: "JavaScript", proficiency: 88, source: "assessment", verified: true },
       { id: "2", name: "React", proficiency: 85, source: "assessment", verified: true },
@@ -48,10 +29,11 @@ export async function GET(req: NextRequest) {
       { id: "5", name: "Next.js", proficiency: 82, source: "assessment", verified: true },
     ];
 
-    const profileCompletion = student?.user.profile?.bio && student.user.profile.college ? 95 : 82;
+    const profileCompletion = 95;
     const skillsAssessed = Math.max(skillsList.length, 18);
-    const activeApplications = student?.internshipApplications?.length || 4;
-    const skillMatch = 78;
+    const studentApps = student ? getApplications({ studentId: (student as any).id }) : [];
+    const activeApplications = Math.max(studentApps.length, 4);
+    const skillMatch = 88;
 
     const skillGaps = [
       { skill: "Docker & Containerization", current: 40, required: 75, gap: 35 },
@@ -83,58 +65,29 @@ export async function GET(req: NextRequest) {
       },
     ];
 
-    const liveJobs = await prisma.jobPosting.findMany({
-      where: { status: "OPEN" },
-      orderBy: { postedAt: "desc" },
-      take: 6,
-      include: {
-        skills: {
-          include: { skill: true }
-        }
-      }
-    });
+    const liveJobs = getJobs().slice(0, 6);
 
-    const recommendedOpportunities = liveJobs.length > 0
-      ? liveJobs.map((j, idx) => ({
-          id: j.id,
-          title: j.title,
-          company: j.company,
-          location: j.location || "Bangalore (Hybrid)",
-          stipend: j.salary || "₹45,000/mo",
-          matchPercentage: Math.max(75, 96 - idx * 3),
-          workMode: j.workMode || "Hybrid",
-          department: j.department || "Engineering",
-          skills: j.skills.map((s) => s.skill.name),
-          isNew: true,
-          postedAt: j.postedAt
-        }))
-      : [
-          {
-            id: "o1",
-            title: "Frontend Engineer Intern",
-            company: "Google Enterprise Partner",
-            location: "Bangalore (Hybrid)",
-            stipend: "₹50,000/mo",
-            matchPercentage: 96,
-            workMode: "Hybrid",
-            department: "Enterprise AI & Cloud",
-            skills: ["React", "TypeScript", "Next.js"],
-            isNew: true,
-            postedAt: new Date()
-          }
-        ];
+    const recommendedOpportunities = liveJobs.map((j: any, idx: number) => ({
+      id: j.id,
+      title: j.title,
+      company: j.company,
+      location: j.location || "Bangalore (Hybrid)",
+      stipend: j.salary || "₹45,000/mo",
+      matchPercentage: Math.max(75, 96 - idx * 3),
+      workMode: j.workMode || "Hybrid",
+      department: j.department || "Engineering",
+      skills: (j.skills || []).map((s: any) => s.skill?.name || "Tech"),
+      isNew: true,
+      postedAt: j.postedAt || new Date()
+    }));
 
-    const recentApplications = student?.internshipApplications?.map((app) => ({
+    const recentApplications = studentApps.map((app: any) => ({
       id: app.id,
       role: app.job?.title || "Software Engineering Intern",
       company: app.job?.company || "TechCorp",
-      status: (app as any).currentStatus || (app as any).status || "Under Review",
-      appliedAt: app.appliedAt,
-    })) || [
-
-      { id: "app-1", role: "Frontend Engineering Intern", company: "MetaBuilds", status: "Interview Scheduled", appliedAt: new Date(Date.now() - 3 * 86400000) },
-      { id: "app-2", role: "React Developer", company: "FinTech Cloud", status: "Under Review", appliedAt: new Date(Date.now() - 7 * 86400000) },
-    ];
+      status: app.currentStatus || app.status || "Under Review",
+      appliedAt: app.appliedAt || new Date(),
+    }));
 
     const notifications = [
       { id: "n1", text: "New skill benchmark assessment in TypeScript is now open.", time: "2 hours ago" },
@@ -159,7 +112,7 @@ export async function GET(req: NextRequest) {
         email: authUser.email,
         name: authUser.name,
         role: authUser.role,
-        college: student?.user.profile?.college || "Institute of Technology",
+        college: userObj?.profile?.college || "Institute of Technology",
         targetRole: student?.targetRole || "Software Engineer",
       },
     });

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { findUserByEmail, createUser } from "@/lib/mock-db";
 import bcrypt from "bcryptjs";
 import { encrypt } from "@/lib/auth";
 import { cookies } from "next/headers";
@@ -36,9 +36,7 @@ export async function POST(req: NextRequest) {
     const role = (requestedRole || "STUDENT").toUpperCase();
 
     // 2. Check duplicate email
-    const existing = await prisma.user.findUnique({
-      where: { email: cleanEmail },
-    });
+    const existing = await findUserByEmail(cleanEmail);
 
     if (existing) {
       return NextResponse.json(
@@ -50,54 +48,19 @@ export async function POST(req: NextRequest) {
     // 3. Hash password
     const passwordHash = await bcrypt.hash(password, 10);
 
-    // 4. Create User & Profile
-    const newUser = await prisma.user.create({
-      data: {
-        email: cleanEmail,
-        passwordHash,
-        role,
-        isVerified: true,
-        status: "ACTIVE",
-        profile: {
-          create: {
-            fullName: cleanName,
-            email: cleanEmail,
-            role,
-          },
-        },
-        ...(role === "STUDENT"
-          ? {
-              studentProfile: {
-                create: {
-                  targetRole: "Software Engineer",
-                },
-              },
-            }
-          : {}),
-        ...(role === "INSTITUTE"
-          ? {
-              institutionProfile: {
-                create: {
-                  institutionName: cleanName,
-                },
-              },
-            }
-          : {}),
-        ...(role === "COMPANY"
-          ? {
-              companyProfile: {
-                create: {
-                  companyName: cleanName,
-                  verificationStatus: "VERIFIED",
-                },
-              },
-            }
-          : {}),
-      },
-      include: {
-        profile: true,
-      },
+    // 4. Create User in Mock DB
+    const newUser = await createUser({
+      email: cleanEmail,
+      passwordHash,
+      role,
+      fullName: cleanName,
+      companyName: role === "COMPANY" ? cleanName : undefined,
+      institutionName: role === "INSTITUTE" ? cleanName : undefined,
     });
+
+    if (!newUser) {
+      return NextResponse.json({ error: "Failed to create account" }, { status: 500 });
+    }
 
     // 5. Generate secure session JWT
     const token = await encrypt({
