@@ -44,7 +44,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { CampusBridgeLogo } from "../../login/page";
+import { SkillSyncLogo } from "../../login/page";
 
 // Primary Section Navigation Definition (14 sections exact matching prompt)
 type SectionType =
@@ -260,7 +260,7 @@ function InstituteDashboardContent() {
         {/* Brand Header */}
         <div className="p-5 border-b border-slate-200/80">
           <div className="flex items-center space-x-3">
-            <CampusBridgeLogo className="w-7 h-7" />
+            <SkillSyncLogo className="w-7 h-7" />
           </div>
           <p className="font-mono text-[10px] tracking-[0.2em] font-semibold text-slate-400 uppercase mt-4">
             INSTITUTION WORKSPACE

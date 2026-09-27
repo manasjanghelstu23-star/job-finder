@@ -773,7 +773,7 @@ export default function StudentCommunitiesPage() {
                     <span>Verified Academic & Industry Guilds</span>
                   </div>
                   <h2 className="text-3xl font-black tracking-tight text-white drop-shadow-md">
-                    Find Your Community <span className="text-purple-300">on CampusBridge</span>
+                    Find Your Community <span className="text-purple-300">on Skill-Sync</span>
                   </h2>
                   <p className="text-xs text-purple-200/80 leading-relaxed max-w-md mx-auto">
                     Collaborate on AI research, hackathons, and placement drives directly with faculty mentors and industry partners.

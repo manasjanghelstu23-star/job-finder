@@ -19,7 +19,7 @@ import {
   HelpCircle,
   FileText,
 } from "lucide-react";
-import { CampusBridgeLogo } from "../login/page";
+import { SkillSyncLogo } from "../login/page";
 
 export default function StudentLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -60,7 +60,7 @@ export default function StudentLayout({ children }: { children: React.ReactNode 
             <Menu className="w-5 h-5" />
           </button>
           <Link href="/student/dashboard" className="flex items-center">
-            <CampusBridgeLogo className="w-7 h-7" />
+            <SkillSyncLogo className="w-7 h-7" />
           </Link>
         </div>
 

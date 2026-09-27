@@ -17,7 +17,7 @@ import {
   Sparkles,
   Award,
 } from "lucide-react";
-import { CampusBridgeLogo } from "../login/page";
+import { SkillSyncLogo } from "../login/page";
 
 const navItems = [
   { name: "Home Overview", tab: "home", href: "/company/dashboard?tab=home", icon: Building2 },
@@ -43,7 +43,7 @@ function CompanyHeader() {
       {/* Brand Logo */}
       <div className="flex items-center space-x-3">
         <Link href="/company/dashboard" className="flex items-center">
-          <CampusBridgeLogo className="w-7 h-7" />
+          <SkillSyncLogo className="w-7 h-7" />
         </Link>
       </div>
 

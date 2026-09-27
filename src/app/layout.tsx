@@ -19,7 +19,7 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "CampusBridge | Academia-Industry Platform",
+  title: "Skill-Sync | Academia-Industry Platform",
   description: "Assess your skills, discover relevant opportunities, and build a verified portfolio.",
 };
 

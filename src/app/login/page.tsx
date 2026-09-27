@@ -22,8 +22,8 @@ import {
 import { GoogleIcon } from "./auth-icons";
 import { TermsModal } from "./terms-modal";
 
-// CampusBridge Brand Logo
-export function CampusBridgeLogo({
+// Skill-Sync Brand Logo
+export function SkillSyncLogo({
   className = "w-7 h-7",
   dark = false,
 }: {
@@ -37,19 +37,21 @@ export function CampusBridgeLogo({
           dark ? "bg-white text-[#13664d]" : "bg-[#13664d] text-white"
         } flex items-center justify-center font-bold text-sm shadow-xs select-none tracking-tight`}
       >
-        C
+        S
       </div>
       <div className="flex items-center text-[19px] tracking-tight">
         <span className={`font-extrabold ${dark ? "text-white" : "text-[#14231E]"}`}>
-          Campus
+          Skill
         </span>
         <span className={`font-semibold ${dark ? "text-[#a7f3d0]" : "text-[#13664d]"}`}>
-          Bridge
+          -Sync
         </span>
       </div>
     </div>
   );
 }
+
+export const CampusBridgeLogo = SkillSyncLogo;
 
 function LoginContent() {
   const router = useRouter();
@@ -225,7 +227,7 @@ function LoginContent() {
         </div>
       )}
 
-      {/* LEFT COLUMN: BRAND & HERO (CampusBridge Green Background) */}
+      {/* LEFT COLUMN: BRAND & HERO (Skill-Sync Green Background) */}
       <div className="w-full md:w-1/2 bg-[#13664d] text-white p-8 sm:p-12 lg:p-16 flex flex-col justify-between relative overflow-hidden min-h-[420px] md:min-h-screen">
         {/* Subtle Background Decorative Concentric Arcs */}
         <div className="absolute -bottom-24 -right-24 w-[480px] h-[480px] rounded-full border border-white/10 pointer-events-none" />
@@ -234,7 +236,7 @@ function LoginContent() {
 
         {/* Brand Header */}
         <div className="z-10">
-          <CampusBridgeLogo className="w-8 h-8" dark />
+          <SkillSyncLogo className="w-8 h-8" dark />
         </div>
 
         {/* Hero Copy */}
@@ -272,7 +274,7 @@ function LoginContent() {
         <div className="max-w-md w-full mx-auto my-auto">
           {/* Section Eyebrow & Title */}
           <p className="font-mono text-[11px] tracking-[0.22em] text-slate-400 uppercase font-semibold mb-2">
-            WELCOME TO CAMPUSBRIDGE
+            WELCOME TO SKILL-SYNC
           </p>
 
           <h2 className="font-serif text-3xl sm:text-4xl font-normal text-[#14231E] tracking-tight">
@@ -543,7 +545,7 @@ function LoginContent() {
           {/* Toggle Sign Up / Sign In */}
           <div className="mt-6 text-center text-xs text-slate-600">
             <span>
-              {isSignUp ? "Already have an account?" : "New to CampusBridge?"}{" "}
+              {isSignUp ? "Already have an account?" : "New to Skill-Sync?"}{" "}
             </span>
             <button
               type="button"
@@ -581,7 +583,7 @@ export default function LoginPage() {
     <Suspense
       fallback={
         <div className="min-h-screen bg-[#13664d] flex items-center justify-center text-white font-sans text-sm">
-          <Loader2 className="w-6 h-6 animate-spin mr-2" /> Loading CampusBridge...
+          <Loader2 className="w-6 h-6 animate-spin mr-2" /> Loading Skill-Sync...
         </div>
       }
     >
